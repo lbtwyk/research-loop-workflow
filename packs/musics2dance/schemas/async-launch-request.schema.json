@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "issue",
+    "experiment_id",
+    "git_head",
+    "script",
+    "sbatch_args",
+    "gpu_count",
+    "walltime_minutes",
+    "output_root",
+    "review_summary"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "issue": {"type": "integer", "minimum": 1},
+    "experiment_id": {"type": "string", "pattern": "^EXP-[0-9]{8}-[A-Za-z0-9._-]+$"},
+    "scope": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
+    "git_head": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "script": {"type": "string", "minLength": 1},
+    "sbatch_args": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "gpu_count": {"type": "integer", "minimum": 0},
+    "walltime_minutes": {"type": "integer", "minimum": 1},
+    "output_root": {"type": "string", "minLength": 1},
+    "review_summary": {"type": "string", "minLength": 1}
+  }
+}

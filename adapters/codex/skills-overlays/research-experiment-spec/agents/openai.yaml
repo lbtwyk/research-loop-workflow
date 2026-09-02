@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Experiment Spec"
+  short_description: "Track complete experiment evidence and lifecycle"
+  default_prompt: "Use $research-experiment-spec to update the complete experiment record and lifecycle registry without losing prior conclusions."

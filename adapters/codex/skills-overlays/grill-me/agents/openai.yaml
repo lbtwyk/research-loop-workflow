@@ -1,0 +1,5 @@
+interface:
+  display_name: "Grill Me"
+  short_description: "Grill in rounds and update the spec after each round"
+policy:
+  allow_implicit_invocation: true

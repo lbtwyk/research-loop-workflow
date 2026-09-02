@@ -1,0 +1,4 @@
+interface:
+  display_name: "Slurm Training Optimizer"
+  short_description: "Close the fastest Slurm training loop"
+  default_prompt: "Use $slurm-training-optimizer to choose the fastest valid launch and close it from normal runtime evidence as keep, change, or unknown."

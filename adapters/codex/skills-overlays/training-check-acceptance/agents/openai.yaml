@@ -1,0 +1,4 @@
+interface:
+  display_name: "Training Check Acceptance"
+  short_description: "Check, recover, and assess training runs"
+  default_prompt: "When the user says check, use $training-check-acceptance for one bounded inspect/repair/fill-stage/report cycle. If training finished, complete required evaluation/renders and deliver the full baseline-comparative analysis. Do not persistently monitor."

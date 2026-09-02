@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "experiment_id": "EXP-YYYYMMDD-short-slug",
+  "spec_path": "docs/experiments/EXP-YYYYMMDD-short-slug.md",
+  "frozen_spec_section": "Frozen Contract",
+  "frozen_spec_sha256": "",
+  "review_paths": [
+    "scripts/example_train.py"
+  ],
+  "required_tests": [
+    "python -m unittest -q tests.test_example"
+  ],
+  "allowed_launchers": [
+    "scripts/example_train.py"
+  ],
+  "invariants": [
+    {
+      "id": "example-invariant",
+      "description": "State one frozen fact the route must keep true.",
+      "spec_anchor": "Frozen Contract"
+    }
+  ],
+  "completion_evidence": [],
+  "launch_scopes": {
+    "train": {
+      "execution_kind": "training",
+      "critical_paths": [
+        "scripts/example_train.py"
+      ],
+      "allowed_launchers": [
+        "scripts/example_train.py"
+      ],
+      "required_tests": [
+        "python -m unittest -q tests.test_example"
+      ],
+      "completion_evidence": [
+        "runs/EXP-YYYYMMDD-short-slug/train/final.ckpt"
+      ]
+    }
+  }
+}

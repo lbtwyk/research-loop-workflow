@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Research Handoff"
+  short_description: "Hand off verified research evidence on GitHub"
+  default_prompt: "Use $github-research-handoff to prepare a verified experiment update or decision handoff and synchronize its confirmed GitHub URL through the ledger."

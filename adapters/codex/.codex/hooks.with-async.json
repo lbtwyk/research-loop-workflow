@@ -1,0 +1,22 @@
+{
+  "description": "Guard contract-matched training launches and unattended async Slurm mutations.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$(git rev-parse --show-toplevel)/.codex/hooks/experiment_guard.py\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "python \"$(git rev-parse --show-toplevel)/.codex/hooks/research_async_guard.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

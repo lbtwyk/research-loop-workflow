@@ -1,0 +1,4 @@
+interface:
+  display_name: "PDF to Markdown"
+  short_description: "Convert PDFs into structured Markdown"
+  default_prompt: "Use $pdf-to-markdown to convert a PDF into structured Markdown with extracted images."

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Paper Deep Dive"
+  short_description: "Master a paper from mechanism to implementation"
+  default_prompt: "Use $paper-deep-dive to deeply unpack this paper phase by phase."
+policy:
+  allow_implicit_invocation: false

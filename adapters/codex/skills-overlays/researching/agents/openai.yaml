@@ -1,0 +1,4 @@
+interface:
+  display_name: "Researching"
+  short_description: "Research papers across domains and apply proven methods"
+  default_prompt: "Use $researching to investigate a technical blocker, search same-domain and cross-domain related work, compare methods, and apply the strongest ideas."

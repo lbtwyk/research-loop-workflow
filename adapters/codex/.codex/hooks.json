@@ -1,0 +1,17 @@
+{
+  "description": "Guard contract-matched training launches without injecting experiment focus into threads.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$(git rev-parse --show-toplevel)/.codex/hooks/experiment_guard.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

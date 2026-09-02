@@ -1,0 +1,8 @@
+interface:
+  display_name: "Paper Reading Coach"
+  short_description: "Read papers with guided Q&A and synthesis"
+  brand_color: "#2563EB"
+  default_prompt: "Use $paper-reading-coach to guide this paper with direct answers, lightweight navigation, and well-timed checks for understanding."
+
+policy:
+  allow_implicit_invocation: true

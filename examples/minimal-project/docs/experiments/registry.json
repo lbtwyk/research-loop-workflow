@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-09-02T03:37:42+00:00",
+  "source_import": "",
+  "experiments": [
+    {
+      "id": "EXP-20260902-demo",
+      "spec": "EXP-20260902-demo.md",
+      "lifecycle": "draft",
+      "outcome": null,
+      "legacy_status": "draft",
+      "branch_worktree": "",
+      "core_change": "Core-only demo",
+      "current_conclusion": "",
+      "latest_artifact": "",
+      "next_action": "Keep as example",
+      "intent_anchor_section": "Intent Anchor",
+      "intent_anchor_sha256": "ff33f6120075a07b8fdf74d5c079be636f35f171d06f5a1079184df35dcd69ed",
+      "intent_anchor_updated_at": "2026-09-02T03:37:42+00:00",
+      "intent_anchor_update_reason": "initial experiment registration"
+    }
+  ],
+  "supplemental_documents": []
+}

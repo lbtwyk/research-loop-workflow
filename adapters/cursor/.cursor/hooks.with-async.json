@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "python .cursor/hooks/experiment_guard.py",
+        "timeout": 10
+      },
+      {
+        "command": "python .cursor/hooks/research_async_guard.py",
+        "timeout": 10
+      }
+    ]
+  }
+}
