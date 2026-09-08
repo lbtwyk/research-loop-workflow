@@ -57,8 +57,10 @@ route's design, reason, decisive evidence, decision, successor, and artifacts.
   tracker or treat it as scientific acceptance.
 - Preserve commit, environment, command, jobs/logs, parent/cache identity,
   checkpoints, resume point, review basis, failures, metrics, and next action.
-- Before every training submission, run the repository ledger preflight for the
-  exact launch command. Require real data/worker, optimizer-step,
+- Every training submission requires a valid preflight receipt for its exact
+  launch identity. Let ledger `launch` reuse the passing receipt or generate
+  one when missing. Rerun only for a changed identity, an invalid receipt, or
+  new failure evidence that invalidates the proof. Require real data/worker, optimizer-step,
   checkpoint-resume, and first-downstream-hook proof. An immediate GPU
   allocation may be skipped when unavailable; it must never enter the queue.
   `launch` and `preflight` require the slurm pack.
@@ -68,7 +70,8 @@ route's design, reason, decisive evidence, decision, successor, and artifacts.
 
 ## Review Routing
 
-For an expensive first launch or a changed scientific contract, read
+For a first training launch, materially changed scientific contract, or
+ demonstrated high-risk execution change, read
 [prelaunch review](references/prelaunch-review.md) and
 [lifecycle and review](references/lifecycle-and-review.md). Use one independent
 read-only scientific reviewer. How that reviewer is spawned is defined by the
@@ -84,3 +87,8 @@ or unresolved uncertainty.
 
 Ordinary code diffs use the project's ordinary review path, not this
 scientific reviewer.
+
+A bounded evaluation, render, analysis, or reporting completion that reuses
+frozen models, data, evaluator semantics, and previously reviewed runtime paths
+uses `review_requirement: focused_validation` with ledger-run focused tests.
+This exemption never applies to training or changed scientific semantics.

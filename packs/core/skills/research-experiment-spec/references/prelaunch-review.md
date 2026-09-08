@@ -1,7 +1,10 @@
 # Pre-Launch Review For Expensive Execution
 
-Read this reference only when an expensive execution family or its hot path
-materially changed.
+Read this reference for a first training launch, materially changed scientific
+contract, or demonstrated high-risk execution change. A bounded evaluation, render, analysis, or reporting completion that reuses
+frozen models, data, evaluator semantics, and previously reviewed runtime paths
+uses `review_requirement: focused_validation` with ledger-run focused tests.
+This exemption never applies to training or changed scientific semantics.
 
 ## Static Packet
 
@@ -56,8 +59,11 @@ Do not submit a separate queued profile job. `sbatch --test-only` validates
 scheduler shape, not runtime efficiency; the formal job supplies runtime
 confirmation.
 
-After review closure and before queue submission, run the repository's
-mandatory training preflight against the exact launch command. Its CPU layer
+After review closure and before queue submission, require the repository's
+valid preflight receipt for the exact launch identity. Ledger `launch` reuses
+the receipt or generates it when needed; do not run an additional proof loop
+for unchanged, valid evidence. New failure evidence invalidating that proof
+requires focused repair and a new receipt. Its CPU layer
 must execute real data/worker, optimizer-step, checkpoint-resume, and first
 downstream-hook paths. A GPU canary may use only a non-queueing immediate Slurm
 allocation; explicit resource unavailability is a recorded skip, while a

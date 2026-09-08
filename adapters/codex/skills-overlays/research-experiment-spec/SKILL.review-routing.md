@@ -59,8 +59,10 @@ route's design, reason, decisive evidence, decision, successor, and artifacts.
   do not create a parallel stage tracker or treat it as scientific acceptance.
 - Preserve commit, environment, command, jobs/logs, parent/cache identity,
   checkpoints, resume point, review basis, failures, metrics, and next action.
-- Before every training submission, run the repository ledger preflight for the
-  exact launch command. Require real data/worker, optimizer-step,
+- Every training submission requires a valid preflight receipt for its exact
+  launch identity. Let ledger `launch` reuse the passing receipt or generate
+  one when missing. Rerun only for a changed identity, an invalid receipt, or
+  new failure evidence that invalidates the proof. Require real data/worker, optimizer-step,
   checkpoint-resume, and first-downstream-hook proof. An immediate Slurm GPU
   allocation may be skipped when unavailable; it must never enter the queue.
   On Isambard, do not say `interactive` alone: ordinary `workq` is 1.0× NHR;
@@ -74,7 +76,8 @@ route's design, reason, decisive evidence, decision, successor, and artifacts.
 
 ## Review Routing
 
-For an expensive first launch or changed scientific contract, read
+For a first training launch, materially changed scientific contract, or
+ demonstrated high-risk execution change, read
 [prelaunch review](references/prelaunch-review.md) and
 [lifecycle and review](references/lifecycle-and-review.md). Use one read-only
 critical reviewer and follow their impact-priority rubric: core logic first,
@@ -88,3 +91,8 @@ is optional and estimates are acceptable. Main-agent proof closure is sufficient
 for same-contract proof
 findings; use delta review only for changed semantics, reviewer judgment,
 failed proof, or unresolved uncertainty.
+
+A bounded evaluation, render, analysis, or reporting completion that reuses
+frozen models, data, evaluator semantics, and previously reviewed runtime paths
+uses `review_requirement: focused_validation` with ledger-run focused tests.
+This exemption never applies to training or changed scientific semantics.

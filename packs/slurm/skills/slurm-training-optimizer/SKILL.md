@@ -43,11 +43,12 @@ Choose one coherent route in this order:
 
 1. Reuse free resources inside a verified dispatcher allocation. A plain batch
    job and node-idle GPUs outside fixed `AllocTRES` are not reusable.
-2. Use the authorized `--reservation=interactive` fast path when it wins
-   wall-clock time, fits the live 8-hour / 4-node / per-user job cap, and the
-   1.5× NHR premium is accepted. This is the reserved node pool, not a higher
-   Slurm priority score and not automatically `interactive_qos`. Use
-   Slurm-owned background `sbatch` for long work.
+2. Use the authorized reservation fast path when it wins wall-clock time and
+   fits the current scheduler limits and the task's approved budget. Reuse
+   recorded authorization for the reservation premium; do not ask again unless
+   cost or scope exceeds that authorization. Read site billing and limits from
+   the project site guidance and current scheduler evidence, not fixed caps in
+   this skill. Use Slurm-owned background `sbatch` for long work.
 3. Right-size GPUs, CPUs, `--mem-per-gpu`, and walltime from estimates and
    recent elapsed/`MaxRSS`; keep demonstrated OOM/timeout headroom.
 4. Prefer same-effective-batch CUDA MPS for independent processes, then pack
@@ -57,7 +58,7 @@ Choose one coherent route in this order:
 5. Use `--time-min` only with proved useful atomic exact resume.
 6. Use bounded waves when useful jobs exceed the live backfill test cap.
 7. Fall back to ordinary `workq` without the reservation when the reserved
-   pool cannot start or cannot keep the 8-hour contract.
+   pool cannot start or cannot fit the live walltime limit with exact resume.
 
 Keep `batch_size`, LR, seed, update budget, and route fixed. A matched
 `batch_size` change requires explicit user approval and cannot alter a running

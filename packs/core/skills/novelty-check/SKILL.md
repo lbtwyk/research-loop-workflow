@@ -23,26 +23,22 @@ Given a method description, systematically verify its novelty:
 
 ### Phase A: Extract Key Claims
 1. Read the user's method description
-2. Identify 3-5 core technical claims that would need to be novel:
+2. Identify the actual technical claims whose novelty matters:
    - What is the method?
    - What problem does it solve?
    - What is the mechanism?
    - What makes it different from obvious baselines?
 
 ### Phase B: Multi-Source Literature Search
-For EACH core claim, search using ALL available sources:
+Search primary literature for each actual novelty claim using the sources
+that can resolve it. Start with precise mechanism terms; expand to synonyms,
+precursors, or adjacent fields when a concrete gap remains. Cover recent work
+and earlier mechanism precedents rather than imposing a fixed year range.
 
-1. **Web Search** (via `WebSearch`):
-   - Search arXiv, Google Scholar, Semantic Scholar
-   - Use specific technical terms from the claim
-   - Try at least 3 different query formulations per claim
-   - Include year filters for 2024-2026
-
-2. **Known paper databases**: Check against:
-   - ICLR 2025/2026, NeurIPS 2025, ICML 2025/2026
-   - Recent arXiv preprints (2025-2026)
-
-3. **Read abstracts**: For each potentially overlapping paper, WebFetch its abstract and related work section
+Read the closest papers' relevant text to verify overlap and differences.
+Stop when the closest work and consequential deltas are established and
+additional searches are redundant. If coverage remains incomplete, state the
+specific gap rather than filling a query or source quota.
 
 ### Phase C: Adversarial Verification
 Challenge the novelty assessment locally by trying to disprove each claimed delta,
@@ -84,7 +80,7 @@ Output a structured report:
 - "Applying X to Y" is NOT novel unless the application reveals surprising insights
 - Check both the method AND the experimental setting for novelty
 - If the method is not novel but the FINDING would be, say so explicitly
-- Always check the most recent 6 months of arXiv — the field moves fast
+- Include recent relevant preprints through the current search date; do not exclude older foundational work.
 - A recommendation is decision input, not authorization to implement, abandon,
   launch, or change an experiment route
 

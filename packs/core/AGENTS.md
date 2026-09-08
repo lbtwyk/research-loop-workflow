@@ -35,9 +35,11 @@ failures, evaluate, audit, and report evidence.
 
 ## Review And Launch
 
-- The first expensive launch or a changed scientific contract needs one
-  independent read-only review. The implementer cannot issue that pass.
+- A first training launch, materially changed scientific contract, or
+  demonstrated high-risk execution change needs one independent read-only review. The implementer cannot issue that pass.
   How the reviewer is spawned is an agent-adapter concern.
+  Bounded downstream completion reusing frozen semantics and reviewed runtime
+  paths uses ledger-run `focused_validation`; this never exempts training.
 - Review core scientific and contract fidelity first, material resource fit
   second, scoped provenance third, and generic hardening last. Missing
   efficiency precision is `UNCERTAIN`, not a launch veto.

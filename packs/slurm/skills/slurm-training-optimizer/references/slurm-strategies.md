@@ -6,8 +6,8 @@
 |---|---|---|
 | GPU preflight on Isambard | `--reservation=interactive` plus `--immediate` | Never omit the bounded deadline |
 | Current user already has a running reservation job | Join uncommitted resources already in its fixed `AllocTRES` with `srun --jobid=JOB_ID --exact --exclusive --ntasks=1` | Owner, `Reservation=interactive`, running state, allocated shape, or remaining walltime is not verified |
-| Authorized formal workload that fits 8h / 4 nodes | Reservation allocation with packed exclusive steps; accept 1.5× NHR | The scheduler rejects the shape or time, or ordinary `workq` would finish sooner after queue wait |
-| Long authorized formal workload on the reservation | Background `sbatch --reservation=interactive` | The run must fail immediately rather than queue, or needs more than 8 hours |
+| Authorized formal workload within live reservation limits | Reservation allocation with packed exclusive steps; accept 1.5× NHR | The scheduler rejects the shape or time, or ordinary `workq` would finish sooner after queue wait |
+| Long authorized formal workload on the reservation | Background `sbatch --reservation=interactive` | The run must fail immediately rather than queue, or cannot fit the live walltime limit with exact resume |
 | Exact-resume training with a useful short interval | `--time` maximum, `--time-min` useful minimum, pre-timeout signal | Resume is approximate, incomplete, or a shortened run is useless |
 | Low SM% / unused HBM on an independent same-contract process | Same-effective-batch CUDA MPS on one GPU | Host RSS * n exceeds `--mem-per-gpu`, JAX MPS is excluded, or the pair has no canary |
 | Many independent short one-GPU tasks | One multi-GPU allocation with concurrent exclusive steps | Mutable state overlaps or one step failure cannot be surfaced |
@@ -140,11 +140,14 @@ ledger identity, inputs, checkpoint semantics, outputs, and downstream gates.
 The project owner has confirmed formal-workload authorization and the 1.5×
 reservation rate. Treat `--reservation=interactive` as the first-choice
 execution transport when it shortens time to the requested result and fits
-the 8-hour / 4-node / official per-user job cap.
+the current enforced walltime, node, and per-user allocation limits. Reuse the
+recorded premium authorization within the approved task budget; ask only for
+cost or scope beyond that authorization.
 
 Eligibility checklist:
 
-1. Run the normal CPU and GPU preflight first.
+1. Require the exact-identity preflight receipt; let ledger reuse valid proof
+   or generate it when missing or invalidated, rather than rerunning it here.
 2. Read the live enforced job, GPU/node, concurrency, and walltime limits before
    allocation; size the route to what Slurm will accept.
 3. Use `srun --reservation=interactive --immediate=N` for a single command or

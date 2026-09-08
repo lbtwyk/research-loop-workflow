@@ -5,9 +5,12 @@ description: "Run one complete training check: inspect progress, recover same-co
 
 # Training Check Acceptance
 
-On each explicit `check` request, complete one bounded check-and-act cycle. Do
-not persistently monitor or wait for separate repair, evaluation, or reporting
-prompts.
+Match the cycle to the user's request. A status-only query is read-only and
+ends after one inspection. An authorized repair/check-and-act request completes
+the ready, declared stages and same-contract recovery without extra prompts.
+For an explicit monitor or finish request, continue with the available durable
+job and monitoring mechanisms until the requested outcome or a real blocker.
+Existing authorization carries forward; this does not expand budget or scope.
 
 ## Workflow
 
@@ -27,8 +30,11 @@ prompts.
    prove runtime/training completion only.
 3. For `running`, verify real advancement, avoid duplicate submission, and
    report the latest meaningful milestone. For `interrupted` or `stalled`,
-   diagnose the demonstrated failure, make at most one same-contract operational
-   repair, resume through the guarded ledger launcher, and verify new progress.
+   when recovery is authorized, diagnose and repair demonstrated same-contract
+   operational failures, resume through the guarded ledger launcher, and verify
+   new progress. A distinct, understood failure may be repaired in the same
+   task. If the same failure recurs after its repair, or its cause is ambiguous,
+   stop retrying that path and report the evidence and required decision.
    Every new or resumed training submission must run or reuse the exact-identity
    training preflight receipt. An immediate GPU preflight may be
    `skipped_unavailable`; it must never be queued, and a started GPU program
@@ -69,9 +75,13 @@ not the status of the root or longest-running job.
   paths. Do not hide upstream data/cache corruption with downstream patches.
 - Do not change scientific routes/contracts, modify reviewed source during an
   active run, accept/reject results, merge, or cancel for scientific reasons.
-  A new expensive launch still goes through `research-experiment-spec` and
-  the installed agent adapter's independent reviewer.
+  Apply the review triggers and focused-validation exemptions in
+  `research-experiment-spec`; recovery does not waive required launch proof.
 - Escalate only repeated or ambiguous failure, a scientific choice, missing
   authority, or final acceptance. In explicitly non-mutating requests, observe
   and report only.
-- End after the response; another cycle requires another explicit `check`.
+- A one-shot check ends after its report. An explicit sustained-work request
+  authorizes further cycles within its existing scope and budget; do not require
+  another `check` prompt. Use the product's monitoring mechanism for waiting,
+  not shell polling loops. Report a missing monitoring capability as a blocker,
+  not as completed work.

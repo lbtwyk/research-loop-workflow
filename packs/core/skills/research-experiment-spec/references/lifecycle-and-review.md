@@ -18,6 +18,11 @@ accepted, rejected, inconclusive, or superseded meaning.
 
 ## Review
 
+Independent review is required for a first training launch, materially changed
+scientific contract, or demonstrated high-risk execution change. Bounded
+downstream completion reusing frozen scientific semantics and reviewed runtime
+paths uses ledger-run `focused_validation`; this never exempts training.
+
 On Cursor, spawn the reviewer as in [cursor-subagents.md](cursor-subagents.md). The
 child receives the frozen contract, complete scientific review paths,
 required identity records, required tests, data/evaluation contract, launcher
