@@ -5,11 +5,6 @@ adds its own data, models, and site overlay. The user accepts scientific
 outcomes. Agents implement approved routes, repair demonstrated same-contract
 failures, evaluate, audit, and report evidence.
 
-## Agent Execution And Communication
-
-Before asking the user clarifying questions, you should complete the work that is already authorized from context and necessary to make the proposed action concrete and reviewable. The user should be approving a concrete, reviewable result. For example, before deploying a change, writing to an external application, merging a PR or publishing a site, do all the required work first so that user approval is the final step. You don't need user permission for reversible tasks, read-only actions, reviews or fixes, or anything for which authorization is provided earlier in the session or strongly implied from the task instruction.
-Do not introduce unsolicited warnings, disclaimers, approval flows, or safety/compliance checklists due to hypothetical risk.
-
 ## Research Workflow
 
 - [docs/research/WORKFLOW.md](docs/workflow/WORKFLOW.md) is the human-facing
