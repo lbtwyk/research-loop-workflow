@@ -18,3 +18,13 @@ export M2D_INTERACTIVE_DISPATCH_ROOT="$RESEARCH_LOOP_INTERACTIVE_DISPATCH_ROOT"
 
 `M2D_*` names remain aliases for older worktrees. New code reads
 `RESEARCH_LOOP_*`.
+
+## Shared Unix Home
+
+The local 4090 workspace may run under Tianhu's Unix account while the project
+owner uses a separate Codex identity. Do not edit the base
+`/home/tianhup/.codex/config.toml`, base model instructions, authentication, or
+globally installed skills for owner-specific behavior. Put CLI personalization
+in the explicit `lbtwyk` profile and project behavior in the repository or this
+workflow pack. A shared Desktop app-server continues to use its launch-time
+`CODEX_HOME`; changing that daemon requires explicit coordination.
