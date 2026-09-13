@@ -26,5 +26,13 @@ owner uses a separate Codex identity. Do not edit the base
 `/home/tianhup/.codex/config.toml`, base model instructions, authentication, or
 globally installed skills for owner-specific behavior. Put CLI personalization
 in the explicit `lbtwyk` profile and project behavior in the repository or this
-workflow pack. A shared Desktop app-server continues to use its launch-time
-`CODEX_HOME`; changing that daemon requires explicit coordination.
+workflow pack.
+
+The owner's Desktop App uses a separate `/home/tianhup/.codex-lbtwyk`
+`CODEX_HOME`, including its own config, model instructions, mutable task state,
+daemon, and control socket. Start or inspect it through `codex-lbtwyk`; connect
+the App through `codex-lbtwyk app-server proxy`. The owner defaults are
+`gpt-6-astra` with medium reasoning. Keep the ordinary `codex` executable and
+`/home/tianhup/.codex/app-server-control/app-server-control.sock` assigned to
+Tianhu. Never repoint, restart, or stop that default daemon as part of owner
+setup or maintenance.
