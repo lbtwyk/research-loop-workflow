@@ -74,7 +74,8 @@ For materially changed scientific semantics or a demonstrated high-risk
 execution change, read
 [prelaunch review](references/prelaunch-review.md) and
 [lifecycle and review](references/lifecycle-and-review.md). Use one read-only
-critical reviewer and follow their impact-priority rubric: core logic first,
+`reviewer` agent, configured as `gpt-5.6-luna` with max reasoning and fast
+service tier, and follow its impact-priority rubric: core logic first,
 live material efficiency/resource risk second, scoped provenance third, and
 generic hardening last. A first launch, new experiment ID, or routine ablation
 does not normally trigger review when reviewed semantics and runtime paths are

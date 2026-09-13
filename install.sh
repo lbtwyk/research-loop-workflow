@@ -164,6 +164,7 @@ for agent in "${AGENTS[@]+"${AGENTS[@]}"}"; do
           install_skills "$ROOT/packs/musics2dance/skills" "$HOME/.codex/skills"
         fi
         overlay_dir "$ROOT/adapters/codex/skills-overlays" "$HOME/.codex/skills"
+        overlay_dir "$ROOT/adapters/codex/agents" "$HOME/.codex/agents"
       fi
       if [[ -n "$DEST" ]]; then
         install_skills "$ROOT/packs/core/skills" "$DEST/.agents/skills"
@@ -174,6 +175,7 @@ for agent in "${AGENTS[@]+"${AGENTS[@]}"}"; do
           install_skills "$ROOT/packs/musics2dance/skills" "$DEST/.agents/skills"
         fi
         overlay_dir "$ROOT/adapters/codex/skills-overlays" "$DEST/.agents/skills"
+        overlay_dir "$ROOT/adapters/codex/agents" "$DEST/.codex/agents"
         mkdir -p "$DEST/.codex/hooks"
         cp -a "$ROOT/packs/core/scripts/experiment_guard.py" "$DEST/.codex/hooks/experiment_guard.py"
         cp -a "$ROOT/adapters/codex/.codex/hooks.json" "$DEST/.codex/hooks.json"
