@@ -36,3 +36,9 @@ the App through `codex-lbtwyk app-server proxy`. The owner defaults are
 `/home/tianhup/.codex/app-server-control/app-server-control.sock` assigned to
 Tianhu. Never repoint, restart, or stop that default daemon as part of owner
 setup or maintenance.
+
+On `hrl-4090-server`, the owner's MacBook SSH public key is bound to
+`/home/tianhup/.local/bin/lbtwyk-ssh-session`. That entry exports the isolated
+`CODEX_HOME` before running the original SSH command, so an unmodified Desktop
+App command (`codex app-server proxy`) reaches the owner's socket automatically.
+Do not attach this forced command to Tianhu's SSH keys.
