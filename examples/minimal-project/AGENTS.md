@@ -35,8 +35,11 @@ failures, evaluate, audit, and report evidence.
 
 ## Review And Launch
 
-- The first expensive launch or a changed scientific contract needs one
-  independent read-only review. The implementer cannot issue that pass.
+- Independent read-only review is used for materially changed
+  scientific semantics or a demonstrated high-risk execution change. A first
+  launch, new experiment ID, or routine ablation does not normally trigger
+  review when reviewed semantics are reused. The implementer cannot issue a
+  required pass.
   How the reviewer is spawned is an agent-adapter concern.
 - Review core scientific and contract fidelity first, material resource fit
   second, scoped provenance third, and generic hardening last. Missing

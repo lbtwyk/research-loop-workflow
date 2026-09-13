@@ -80,9 +80,10 @@ refactoring, and same-claim revisions stay as routes or runs in the parent.
 2. The spec records those choices. A contract freezes executable semantics
    when formal work is required.
 3. Implementation and focused tests establish readiness.
-4. The first expensive launch or a changed scientific contract receives one
-   independent read-only review. Same-contract operational repairs use focused
-   validation.
+4. Materially changed scientific semantics or a demonstrated high-risk
+   execution change receives one independent read-only review. A first launch,
+   new experiment ID, or routine ablation reusing reviewed semantics normally
+   uses focused validation.
 5. If resource shape is still unsettled and a scheduler pack is installed,
    choose the launch from live evidence. Prefer same-effective-batch sharing,
    then whole-node exclusive packing, before unmatched batch-size changes.

@@ -80,17 +80,19 @@ refactoring, and same-claim revisions stay as routes or runs in the parent.
 2. The spec records those choices. A contract freezes executable semantics
    when formal work is required.
 3. Implementation and focused tests establish readiness.
-4. The first expensive launch or a changed scientific contract receives one
-   independent read-only review. Same-contract operational repairs use focused
-   validation.
+4. Materially changed scientific semantics or a demonstrated high-risk
+   execution change receives one independent read-only review. A first launch,
+   new experiment ID, or routine ablation reusing reviewed semantics uses
+   focused validation.
 5. If resource shape is still unsettled and a scheduler pack is installed,
    choose the launch from live evidence. Prefer same-effective-batch sharing,
    then whole-node exclusive packing, before unmatched batch-size changes.
 6. When a scheduler snapshot exists, compile the exact launch packet. The
    packet does not submit anything.
-7. A new or changed training identity runs one real-path preflight; an
-   unchanged identity reuses its receipt. Immediate GPU probes may be
-   `skipped_unavailable` only if the program never starts.
+7. On a direct-attached GPU, changed-seam checks plus early formal-run evidence
+   are the default execution proof. Standalone resume, downstream-hook, or
+   resource proof is useful for a changed or failed seam or another concrete
+   live risk. Scheduler-pack preflight remains available for cluster launches.
 8. Launch and durable runtime identity go through the ledger.
 9. A training check owns the operational loop: inspect, repair demonstrated
    same-contract failures, complete declared stages, and report. It never
@@ -107,9 +109,9 @@ refactoring, and same-claim revisions stay as routes or runs in the parent.
 Keep implementation, scheduler state, runtime proof, and scientific acceptance
 explicitly separate.
 
-Preflight is specified in [PREFLIGHT.md](PREFLIGHT.md). `launch` and
-`preflight` require the slurm pack. Without that pack, use `outline`, `add`,
-`update`, `close`, `sync`, `lint`, and the review commands.
+Cluster preflight is specified in [PREFLIGHT.md](PREFLIGHT.md). `launch` and
+`preflight` require the slurm pack. On a direct-attached GPU, record the exact
+command, durable session/log identity, and early formal-run evidence instead.
 
 ## Stage Closure
 

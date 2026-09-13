@@ -24,13 +24,16 @@ required identity records, required tests, data/evaluation contract, launcher
 scope, and Intent Anchor. It returns PASS, UNCERTAIN, or BLOCKED with
 evidence. The implementer cannot issue an independent pass.
 
+Review is used for materially changed scientific semantics or a
+demonstrated high-risk execution change. A first launch, new experiment ID, or
+routine ablation does not normally trigger review when reviewed data, model,
+trainer, evaluator, and runtime semantics are reused.
+
 Review effort is ordered by impact: first core scientific logic and contract
-fidelity, then a required standalone hot-path efficiency/resource-fit
-self-check, then only the provenance identities needed for interpretation or
-exact resume. The efficiency check compares the declared workload shape and
-the exact partition, reservation, QoS, billing rate, GPU/CPU/memory/walltime
-request with measured or code-backed need, headroom, utilization, input wait,
-throughput, and ETA.
+fidelity, then live material hot-path/resource risks, then only the provenance
+identities needed for interpretation or exact resume. Resource review is useful
+when the requested shape changed or evidence indicates OOM, input wait,
+throughput, or ETA risk.
 Estimates and same-hardware history are sufficient; missing or ambiguous
 details are recorded as `UNCERTAIN` and do not by themselves block launch.
 Only demonstrated OOM, impossible hard walltime, deadlock/input starvation,
@@ -46,12 +49,11 @@ and focused tests. Reviewer-judgment findings use one delta review. Changed
 scientific semantics or contract require full review. Operational-only repairs
 need focused validation, not another scientific review.
 
-Launch through the guarded ledger. Before training submission, require its
-exact-identity preflight receipt. Freeze contract SHA, reviewed scientific
-source, launcher, reviewer basis, preflight receipt, and scientific runtime
-path records in the manifest. Tests, docs, launcher wrappers, and other
-operational files do not stale scientific review; launcher changes instead
-stale the cheaper preflight receipt.
+On a direct-attached GPU, launch the exact frozen command durably and use early
+formal-run telemetry as execution proof. Add standalone checkpoint/resume,
+downstream-hook, or resource proof for changed or failed seams or another
+concrete live risk. Freeze the contract, reviewed scientific source when review
+was required, exact command, and runtime paths in the experiment record.
 
 Always distinguish planned, tested, submitted, allocated, running, completed;
 scheduler evidence from model-quality evidence; and clean provenance from

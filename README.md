@@ -39,7 +39,7 @@ Optional paper and process skills: add `--optional`.
 ```text
 packs/core/            agent-neutral workflow, ledger, shared skills
 packs/slurm/           scheduler snapshot, preflight, Slurm skills
-packs/musics2dance/    host skills, async transport
+packs/musics2dance/    host skills and environment overlays
 adapters/cursor/       .cursor rules, hooks, research-reviewer overlay
 adapters/codex/        .codex hooks, agents/openai.yaml
 ```

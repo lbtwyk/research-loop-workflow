@@ -1,6 +1,8 @@
 # Codex Review Overlay
 
-For an expensive first launch or changed scientific contract, use one
-read-only critical reviewer. Do not review your own packet. Follow the
-impact-priority rubric in the shared skill. Do not reference Cursor
+For materially changed scientific semantics or a demonstrated high-risk
+execution change, use one read-only critical reviewer. A first launch, new
+experiment ID, or routine ablation does not normally trigger review when
+reviewed semantics and runtime paths are reused. Do not review your own packet. Follow
+the impact-priority rubric in the shared skill. Do not reference Cursor
 subagents or `/review`.

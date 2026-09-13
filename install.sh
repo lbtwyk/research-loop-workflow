@@ -120,10 +120,8 @@ if [[ -n "$DEST" ]]; then
     cp -a "$ROOT/packs/slurm/docs/." "$DEST/docs/research/"
   fi
   if [[ "$INSTALL_TOPIC" == "musics2dance" ]]; then
-    mkdir -p "$DEST/scripts" "$DEST/docs/research" "$DEST/research/schemas"
-    cp -a "$ROOT/packs/musics2dance/scripts/research_async_guard.py" "$DEST/scripts/"
+    mkdir -p "$DEST/docs/research"
     cp -a "$ROOT/packs/musics2dance/docs/." "$DEST/docs/research/"
-    cp -a "$ROOT/packs/musics2dance/schemas/." "$DEST/research/schemas/"
     cp -a "$ROOT/packs/musics2dance/overlays/hosts.md" "$DEST/docs/research/HOSTS.md"
   fi
 fi
@@ -153,12 +151,7 @@ for agent in "${AGENTS[@]+"${AGENTS[@]}"}"; do
         mkdir -p "$DEST/.cursor/hooks" "$DEST/.cursor/rules"
         cp -a "$ROOT/adapters/cursor/.cursor/rules/." "$DEST/.cursor/rules/"
         cp -a "$ROOT/packs/core/scripts/experiment_guard.py" "$DEST/.cursor/hooks/experiment_guard.py"
-        if [[ "$INSTALL_TOPIC" == "musics2dance" ]]; then
-          cp -a "$ROOT/packs/musics2dance/scripts/research_async_guard.py" "$DEST/.cursor/hooks/research_async_guard.py"
-          cp -a "$ROOT/adapters/cursor/.cursor/hooks.with-async.json" "$DEST/.cursor/hooks.json"
-        else
-          cp -a "$ROOT/adapters/cursor/.cursor/hooks.json" "$DEST/.cursor/hooks.json"
-        fi
+        cp -a "$ROOT/adapters/cursor/.cursor/hooks.json" "$DEST/.cursor/hooks.json"
       fi
       ;;
     codex)
@@ -183,12 +176,7 @@ for agent in "${AGENTS[@]+"${AGENTS[@]}"}"; do
         overlay_dir "$ROOT/adapters/codex/skills-overlays" "$DEST/.agents/skills"
         mkdir -p "$DEST/.codex/hooks"
         cp -a "$ROOT/packs/core/scripts/experiment_guard.py" "$DEST/.codex/hooks/experiment_guard.py"
-        if [[ "$INSTALL_TOPIC" == "musics2dance" ]]; then
-          cp -a "$ROOT/packs/musics2dance/scripts/research_async_guard.py" "$DEST/.codex/hooks/research_async_guard.py"
-          cp -a "$ROOT/adapters/codex/.codex/hooks.with-async.json" "$DEST/.codex/hooks.json"
-        else
-          cp -a "$ROOT/adapters/codex/.codex/hooks.json" "$DEST/.codex/hooks.json"
-        fi
+        cp -a "$ROOT/adapters/codex/.codex/hooks.json" "$DEST/.codex/hooks.json"
       fi
       ;;
     *)

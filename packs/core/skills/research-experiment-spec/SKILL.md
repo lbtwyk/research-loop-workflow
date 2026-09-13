@@ -57,28 +57,33 @@ route's design, reason, decisive evidence, decision, successor, and artifacts.
   tracker or treat it as scientific acceptance.
 - Preserve commit, environment, command, jobs/logs, parent/cache identity,
   checkpoints, resume point, review basis, failures, metrics, and next action.
-- Before every training submission, run the repository ledger preflight for the
-  exact launch command. Require real data/worker, optimizer-step,
-  checkpoint-resume, and first-downstream-hook proof. An immediate GPU
-  allocation may be skipped when unavailable; it must never enter the queue.
-  `launch` and `preflight` require the slurm pack.
+- On a direct-attached GPU, validate changed seams and use the formal run's
+  early evidence as execution proof, typically real-data and optimizer progress
+  plus GPU memory and throughput. Inspect the first scheduled checkpoint when
+  it becomes available. Add a standalone checkpoint/resume or downstream-hook
+  proof when that seam changed, failed, or presents a concrete live risk.
+  Cluster `launch` and `preflight` remain slurm-pack concerns.
 - Update through ledger add/update/close/lint; never hand-edit generated views.
 - Result-to-claim and experiment audit provide decision evidence. Only the user
   accepts an outcome or chooses a successor scientific route.
 
 ## Review Routing
 
-For an expensive first launch or a changed scientific contract, read
+For materially changed scientific semantics or a demonstrated high-risk
+execution change, read
 [prelaunch review](references/prelaunch-review.md) and
 [lifecycle and review](references/lifecycle-and-review.md). Use one independent
 read-only scientific reviewer. How that reviewer is spawned is defined by the
 installed agent adapter. Do not review your own packet. Follow the
-impact-priority rubric: core logic first, material efficiency or resource fit
-second as an explicit review subsection, scoped provenance third, and generic
-hardening last. The review should include a numeric request-versus-need
-estimate table and a clear `PASS`, `UNCERTAIN`, or demonstrated `BLOCKED`
-basis; missing precision is recorded as uncertainty, not an automatic launch
-veto. Main-agent proof closure is sufficient for same-contract proof findings;
+impact-priority rubric: core logic first, live material efficiency or resource
+risk second, scoped provenance third, and generic hardening last. A first
+launch, new experiment ID, or routine ablation does not normally trigger review
+when reviewed data, model, trainer, evaluator, and runtime semantics are reused. Resource
+estimation is useful for a changed resource shape or evidence-backed
+OOM, input-stall, throughput, or ETA risk; normal runtime telemetry is
+sufficient otherwise. Return a clear `PASS` or demonstrated `BLOCKED`, with
+`UNCERTAIN` only for a material open question. Main-agent proof closure is
+sufficient for same-contract proof findings;
 use delta review only for changed semantics, reviewer judgment, failed proof,
 or unresolved uncertainty.
 

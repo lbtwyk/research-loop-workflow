@@ -1,5 +1,8 @@
 # Training Preflight
 
+> Scheduler-pack interface for cluster launches. Direct-attached GPU work uses
+> focused changed-seam checks and early formal-run telemetry by default.
+
 Training preflight is one executable proof for a new or changed formal launch
 identity. Reuse the passing receipt while the identity is unchanged. It is not
 a miniature experiment.

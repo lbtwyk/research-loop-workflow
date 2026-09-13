@@ -59,32 +59,27 @@ route's design, reason, decisive evidence, decision, successor, and artifacts.
   do not create a parallel stage tracker or treat it as scientific acceptance.
 - Preserve commit, environment, command, jobs/logs, parent/cache identity,
   checkpoints, resume point, review basis, failures, metrics, and next action.
-- Before every training submission, run the repository ledger preflight for the
-  exact launch command. Require real data/worker, optimizer-step,
-  checkpoint-resume, and first-downstream-hook proof. An immediate Slurm GPU
-  allocation may be skipped when unavailable; it must never enter the queue.
-  On Isambard, do not say `interactive` alone: ordinary `workq` is 1.0× NHR;
-  `--reservation=interactive` is a reserved node pool at 1.5× NHR with an
-  official 1-job cap and 8-hour limit; `interactive_qos` is a separate
-  one-allocation QoS on that pool. Read the term table in
-  `docs/research/modules/TRAINING_EFFICIENCY.md`.
+- On a direct-attached GPU, validate changed seams and use the formal run's
+  early real-data, optimizer, memory, throughput, and checkpoint evidence as
+  execution proof. Require standalone resume, downstream-hook, or resource
+  proof when that seam changed, failed, or presents a concrete live risk.
+  Cluster launch/preflight remains scheduler-pack policy.
 - Update through ledger add/update/close/lint; never hand-edit generated views.
 - Result-to-claim and experiment audit provide decision evidence. Only the user
   accepts an outcome or chooses a successor scientific route.
 
 ## Review Routing
 
-For an expensive first launch or changed scientific contract, read
+For materially changed scientific semantics or a demonstrated high-risk
+execution change, read
 [prelaunch review](references/prelaunch-review.md) and
 [lifecycle and review](references/lifecycle-and-review.md). Use one read-only
 critical reviewer and follow their impact-priority rubric: core logic first,
-material efficiency/resource fit second as an explicit review subsection,
-scoped provenance third, and generic hardening last. The review should include
-a numeric request-versus-need estimate table and a clear `PASS`, `UNCERTAIN`,
-or demonstrated `BLOCKED` basis; missing precision is recorded as uncertainty,
-not an automatic launch veto. For contracts with `resource_contract`, persist
-the table with `record-review --resource-review-file` when available; the file
-is optional and estimates are acceptable. Main-agent proof closure is sufficient
-for same-contract proof
+live material efficiency/resource risk second, scoped provenance third, and
+generic hardening last. A first launch, new experiment ID, or routine ablation
+does not normally trigger review when reviewed semantics and runtime paths are
+reused. Resource estimates are useful when they can change the launch. Return a
+clear `PASS` or demonstrated `BLOCKED`, with `UNCERTAIN` only for a material
+open question. Main-agent proof closure is sufficient for same-contract proof
 findings; use delta review only for changed semantics, reviewer judgment,
 failed proof, or unresolved uncertainty.

@@ -1,7 +1,9 @@
 # Pre-Launch Review For Expensive Execution
 
-Read this reference only when an expensive execution family or its hot path
-materially changed.
+Read this reference only when scientific semantics materially changed or
+evidence shows a high-risk execution change. A first launch, new experiment ID,
+or routine ablation does not normally trigger review when reviewed data, model,
+trainer, evaluator, and runtime semantics are reused.
 
 ## Static Packet
 
@@ -26,7 +28,7 @@ this order and keep the first two categories as the main effort:
    rules, gradient/update/rollout semantics, data split and cache meaning,
    baseline/control separation, evaluator identity, and exact-resume state
    (optimizer, scheduler, EMA, RNG, sampler, and checkpoint cadence).
-2. **Material compute and resource risks (required review subsection).** Inspect
+2. **Material compute and resource risks (only when live).** Inspect
    the actual hot path on the target hardware: tensor/activation shapes,
    repeated decode/FK or feature work, serial Python/CPU sections, host-device
    transfers, input stalls, synchronization, memory headroom/OOM risk,
@@ -56,29 +58,16 @@ Do not submit a separate queued profile job. `sbatch --test-only` validates
 scheduler shape, not runtime efficiency; the formal job supplies runtime
 confirmation.
 
-After review closure and before queue submission, run the repository's
-mandatory training preflight against the exact launch command. Its CPU layer
-must execute real data/worker, optimizer-step, checkpoint-resume, and first
-downstream-hook paths. A GPU canary may use only a non-queueing immediate Slurm
-allocation; explicit resource unavailability is a recorded skip, while a
-started GPU program failure blocks launch.
+On a direct-attached GPU, do not require a separate general preflight. Run
+focused checks for changed seams, then use the formal job's early real-data,
+optimizer, memory, throughput, and checkpoint evidence. Test checkpoint/resume
+or downstream hooks separately when those paths changed, failed, or present a
+concrete live risk.
 
-The efficiency self-check should contain a compact numeric table with one row
-for each resource and workload field: requested value, measured or code-backed
-need, headroom, evidence path, and PASS/UNCERTAIN/BLOCKED result. Include
-partition, reservation (`none` or `interactive`), QoS, billing rate (1.0×
-ordinary `workq` vs 1.5× reservation NHR), GPU count, CPU count, host memory,
-walltime, batch/window shape, workers, prefetch, precision, peak GPU/host
-memory, utilization, data-wait fraction, throughput, and projected ETA. Do not
-collapse reservation, partition, and QoS into the word `interactive`. A
-machine-readable `resource_contract` is useful when it makes the request
-reproducible, but its absence does not block a launch.
-When available, persist this table through
-`experiment_ledger.py record-review --resource-review-file`; `uncertain` rows
-are allowed in an overall `PASS`, while `blocked` is reserved for demonstrated
-OOM, impossible hard walltime, deadlock/input starvation, or another material
-operational failure. Do not submit a separate profile job solely to measure
-efficiency; the formal job supplies the confirmation.
+Do not require a numeric resource table for a settled local GPU shape. When
+resource shape changed or evidence indicates OOM, input starvation, throughput,
+or ETA risk, record only the measurements and estimates that can change the
+launch. Do not run a separate profile solely to complete review paperwork.
 
 ## Finding And Output Contract
 
