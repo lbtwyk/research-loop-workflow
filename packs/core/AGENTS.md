@@ -17,6 +17,12 @@ Do not introduce unsolicited warnings, disclaimers, approval flows, or safety/co
 - Check the user's premise against evidence and correct material omissions.
   Keep a working definition of done, reassess it as evidence arrives, and report
   material completed results without waiting for a second prompt.
+- Never report a task, subagent, training run, deployment, or external action as
+  created, started, running, or completed without a successful tool result or
+  inspectable runtime evidence. Distinguish prepared commands and submitted
+  work from live execution. For an App-native task action, use the corresponding
+  App thread tool when exposed; do not silently replace a missing native tool
+  with CLI or direct app-server calls.
 
 ## Research Workflow
 
