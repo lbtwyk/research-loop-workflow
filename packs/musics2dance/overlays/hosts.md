@@ -25,7 +25,7 @@ The local 4090 workspace may run under Tianhu's Unix account while the project
 owner uses a separate Codex identity. Do not edit the base
 `/home/tianhup/.codex/config.toml`, base model instructions, authentication, or
 globally installed skills for owner-specific behavior. Put CLI personalization
-in the explicit `lbtwyk` profile and project behavior in the repository or this
+in the owner's private home and project behavior in the repository or this
 workflow pack.
 
 The owner's SSH sessions use the private home
