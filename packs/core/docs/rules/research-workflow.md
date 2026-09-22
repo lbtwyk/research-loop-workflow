@@ -11,9 +11,9 @@
   history. Never hand-edit generated views.
 - Keep implementation, scheduler state, runtime proof, and scientific
   acceptance separate. A finished scheduler job is not acceptance.
-- First expensive launch or a changed scientific contract needs one
-  independent read-only review. Same-contract operational repairs use focused
-  validation.
+- Review materially changed scientific semantics or demonstrated high-risk
+  execution changes once. Routine launches and same-contract repairs use
+  focused validation.
 - Launch training through the ledger. Direct `train_*` / `torchrun` of a
   guarded contract is blocked.
 - After checks, update through `experiment_ledger.py update|close|sync|lint`.

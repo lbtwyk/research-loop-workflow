@@ -8,7 +8,6 @@ human-readable historical record and are never rewritten by this tool.
 from __future__ import annotations
 
 import argparse
-import fcntl
 import getpass
 import hashlib
 import json
@@ -873,6 +872,38 @@ def review_is_current(
     status = str(record.get("review_status"))
     reviewed_at = str(record.get("reviewed_at") or "recorded-review")
     return True, f"review {status} decision is recorded", reviewed_at
+
+
+def launch_review_gate(
+    root: Path, item: dict[str, object], scope: str | None = None
+) -> tuple[bool, str, str | None]:
+    errors, contract = contract_errors(root, item)
+    if errors or contract is None:
+        return False, "; ".join(errors), None
+    resolved_scope, _config = scope_config(contract, scope)
+    record = review_record(item, resolved_scope)
+    status = record.get("review_status")
+    if status in ("fail", "blocked"):
+        return False, f"review status is {status!r}", None
+    resource_review = record.get("resource_review")
+    rows = resource_review.get("rows") if isinstance(resource_review, dict) else None
+    if isinstance(rows, list) and any(
+        isinstance(row, dict) and row.get("decision") == "blocked" for row in rows
+    ):
+        return False, "resource/efficiency review has a BLOCKED row", None
+    paths = scope_list(contract, resolved_scope, "critical_paths", "review_paths")
+    identity = {
+        "contract": sha256_bytes(contract_path(root, item).read_bytes()),
+        "paths": [
+            (
+                str(path),
+                sha256_bytes(safe_repo_path(root, path, "critical path").read_bytes()),
+            )
+            for path in paths
+        ],
+    }
+    basis = sha256_bytes(json.dumps(identity, sort_keys=True).encode("utf-8"))
+    return True, "independent review is advisory unless blocked", basis
 
 
 def operational_is_current(
@@ -2071,7 +2102,7 @@ def command_record_operational(root: Path, args: argparse.Namespace) -> None:
             "operational validation requires a scoped contract with "
             "operational_paths"
         )
-    current, reason, _review_basis = review_is_current(root, item, resolved_scope)
+    current, reason, _review_basis = launch_review_gate(root, item, resolved_scope)
     if not current:
         raise LedgerError(
             "operational validation cannot refresh a stale scientific review: "
@@ -2314,7 +2345,8 @@ def command_launch_packet(root: Path, args: argparse.Namespace) -> None:
         contract["allowed_launchers"] if config is None else config["allowed_launchers"]
     )
     command_allowed = command_uses_allowed_launcher(command, allowed_launchers)
-    review_current, review_reason, review_basis = review_is_current(root, item, scope)
+    review_allowed, review_reason, review_basis = launch_review_gate(root, item, scope)
+    review_current, _, _ = review_is_current(root, item, scope)
     operational_current, operational_reason, operational_basis = operational_is_current(
         root, item, contract, scope
     )
@@ -2351,7 +2383,7 @@ def command_launch_packet(root: Path, args: argparse.Namespace) -> None:
             review_basis=review_basis,
         )
     blockers: list[str] = []
-    if not review_current:
+    if not review_allowed:
         blockers.append(review_reason)
     if not command_allowed:
         blockers.append("command does not use an allowed contract launcher")
@@ -2411,86 +2443,6 @@ def command_launch_packet(root: Path, args: argparse.Namespace) -> None:
         temporary.write_text(text, encoding="utf-8")
         os.replace(temporary, output)
         print(output)
-
-
-def begin_async_launch(
-    root: Path,
-    *,
-    experiment_id: str,
-    review_basis: str,
-    command: list[str],
-) -> tuple[object, Path] | tuple[None, None]:
-    """Create one durable intent per reviewed async command before execution."""
-    if os.environ.get("RESEARCH_LOOP_RESEARCH_ASYNC") != "1":
-        return None, None
-    payload = {
-        "schema_version": 1,
-        "experiment_id": experiment_id,
-        "review_basis": review_basis,
-        "command": command,
-    }
-    fingerprint = sha256_bytes(
-        json.dumps(
-            payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-        ).encode("utf-8")
-    )
-    launch_root = root / "slurm" / experiment_id / "async-launches"
-    launch_root.mkdir(parents=True, exist_ok=True)
-    lock = (launch_root / "launch.lock").open("a+", encoding="utf-8")
-    fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-    intent_path = launch_root / f"{fingerprint}.json"
-    if intent_path.exists():
-        previous = json.loads(intent_path.read_text(encoding="utf-8"))
-        lock.close()
-        raise LedgerError(
-            "async launch blocked: this exact reviewed command already has a "
-            f"durable intent at {intent_path.relative_to(root)} "
-            f"(status={previous.get('status', 'unknown')}); reconcile it "
-            "instead of submitting a duplicate"
-        )
-    payload.update(
-        {
-            "fingerprint": fingerprint,
-            "status": "submission_unknown",
-            "created_at": utc_now(),
-        }
-    )
-    descriptor = os.open(
-        intent_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644
-    )
-    with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
-        json.dump(payload, handle, indent=2, ensure_ascii=False)
-        handle.write("\n")
-        handle.flush()
-        os.fsync(handle.fileno())
-    return lock, intent_path
-
-
-def complete_async_launch(
-    intent_path: Path | None,
-    *,
-    returncode: int,
-    job_id: str | None,
-    manifest_path: Path,
-) -> None:
-    if intent_path is None:
-        return
-    payload = json.loads(intent_path.read_text(encoding="utf-8"))
-    payload.update(
-        {
-            "status": "submitted" if returncode == 0 else "submission_unknown",
-            "returncode": returncode,
-            "slurm_job_id": job_id,
-            "manifest_path": str(manifest_path),
-            "updated_at": utc_now(),
-        }
-    )
-    temporary = intent_path.with_suffix(".tmp")
-    temporary.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
-    os.replace(temporary, intent_path)
 
 
 def unique_launch_manifest_path(
@@ -2768,7 +2720,7 @@ def command_preflight(root: Path, args: argparse.Namespace) -> None:
     contract = load_contract(root, item)
     command = normalized_command(args)
     resolved_scope, config = resolve_launch_scope(contract, args.scope, command)
-    current, reason, review_basis = review_is_current(
+    current, reason, review_basis = launch_review_gate(
         root, item, resolved_scope
     )
     if not current or review_basis is None:
@@ -2818,7 +2770,7 @@ def command_launch(root: Path, args: argparse.Namespace) -> None:
     resolved_scope, config = resolve_launch_scope(
         contract, requested_scope, command
     )
-    current, reason, review_basis = review_is_current(root, item, resolved_scope)
+    current, reason, review_basis = launch_review_gate(root, item, resolved_scope)
     if not current or review_basis is None:
         raise LedgerError(f"launch blocked: {reason}")
     operational_current, operational_reason, operational_basis = (
@@ -2837,6 +2789,13 @@ def command_launch(root: Path, args: argparse.Namespace) -> None:
     if launcher is None:
         raise LedgerError("launch blocked: cannot identify the allowed launcher")
     execution_kind = execution_kind_for_launcher(contract, config, launcher)
+    record = review_record(item, resolved_scope)
+    reviewed = record.get("review_status") in ("pass", "repaired")
+    approval_basis = (
+        record.get("approval_basis", "independent_review_pass")
+        if reviewed
+        else "focused_validation"
+    )
     preflight_status, preflight_path, preflight_receipt = current_preflight_receipt(
         root,
         item=item,
@@ -2855,9 +2814,7 @@ def command_launch(root: Path, args: argparse.Namespace) -> None:
                     "review_status": review_record(
                         item, resolved_scope
                     ).get("review_status"),
-                    "approval_basis": review_record(
-                        item, resolved_scope
-                    ).get("approval_basis", "independent_review_pass"),
+                    "approval_basis": approval_basis,
                     "provenance_degraded": False,
                     "promotable": True,
                     "execution_kind": execution_kind,
@@ -2893,98 +2850,80 @@ def command_launch(root: Path, args: argparse.Namespace) -> None:
         )
         preflight_status = "passed"
 
-    async_lock, async_intent = begin_async_launch(
-        root,
-        experiment_id=args.experiment_id,
-        review_basis=review_basis,
-        command=command,
+    launched_at = utc_now()
+    launch_env = os.environ.copy()
+    result = subprocess.run(
+        command,
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+        env=launch_env,
     )
-    try:
-        launched_at = utc_now()
-        launch_env = os.environ.copy()
-        result = subprocess.run(
-            command,
-            cwd=root,
-            check=False,
-            capture_output=True,
-            text=True,
-            env=launch_env,
-        )
-        if result.stdout:
-            print(result.stdout, end="")
-        if result.stderr:
-            print(result.stderr, end="", file=sys.stderr)
-        job_match = JOB_ID_RE.search(result.stdout)
-        job_id = job_match.group(1) if job_match else None
-        manifest = {
-            "schema_version": 1,
-            "experiment_id": args.experiment_id,
-            "launch_scope": resolved_scope,
-            "launched_at": launched_at,
-            "git_head": git_head(root),
-            "git_dirty_paths": git_dirty_paths(root),
-            "contract_path": item["contract_path"],
-            "provenance_degraded": False,
-            "promotable": True,
-            "execution_kind": execution_kind,
-            "operational_validation_current": operational_current,
-            "operational_validation_note": operational_reason,
-            "operational_validation_basis": operational_basis,
-            "training_preflight_status": preflight_status,
-            "training_preflight_receipt": (
-                None
-                if preflight_path is None
-                else str(preflight_path.relative_to(root))
-            ),
-            "training_preflight_gpu_status": (
-                None
-                if preflight_receipt is None
-                else preflight_receipt["gpu_check"]["status"]
-            ),
-            "reviewer": review_record(item, resolved_scope).get("reviewer"),
-            "reviewed_at": review_record(item, resolved_scope).get("reviewed_at"),
-            "review_status": review_record(item, resolved_scope).get(
-                "review_status"
-            ),
-            "approval_basis": review_record(item, resolved_scope).get(
-                "approval_basis", "independent_review_pass"
-            ),
-            "repair_closure_actor": review_record(item, resolved_scope).get(
-                "repair_closure_actor"
-            ),
-            "repair_closure_at": review_record(item, resolved_scope).get(
-                "repair_closure_at"
-            ),
-            "operational_validator": review_record(item, resolved_scope).get(
-                "operational_validator"
-            ),
-            "operational_validated_at": review_record(item, resolved_scope).get(
-                "operational_validated_at"
-            ),
-            "command": command,
-            "returncode": result.returncode,
-            "slurm_job_id": job_id,
-        }
-        stamp = launched_at.replace(":", "").replace("+00:00", "Z")
-        manifest_path = unique_launch_manifest_path(
-            root / "slurm" / args.experiment_id,
-            stamp,
-            job_id,
-        )
-        manifest_path.parent.mkdir(parents=True, exist_ok=True)
-        manifest_path.write_text(
-            json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8",
-        )
-        complete_async_launch(
-            async_intent,
-            returncode=result.returncode,
-            job_id=job_id,
-            manifest_path=manifest_path.relative_to(root),
-        )
-    finally:
-        if async_lock is not None:
-            async_lock.close()
+    if result.stdout:
+        print(result.stdout, end="")
+    if result.stderr:
+        print(result.stderr, end="", file=sys.stderr)
+    job_match = JOB_ID_RE.search(result.stdout)
+    job_id = job_match.group(1) if job_match else None
+    manifest = {
+        "schema_version": 1,
+        "experiment_id": args.experiment_id,
+        "launch_scope": resolved_scope,
+        "launched_at": launched_at,
+        "git_head": git_head(root),
+        "git_dirty_paths": git_dirty_paths(root),
+        "contract_path": item["contract_path"],
+        "provenance_degraded": False,
+        "promotable": True,
+        "execution_kind": execution_kind,
+        "operational_validation_current": operational_current,
+        "operational_validation_note": operational_reason,
+        "operational_validation_basis": operational_basis,
+        "training_preflight_status": preflight_status,
+        "training_preflight_receipt": (
+            None
+            if preflight_path is None
+            else str(preflight_path.relative_to(root))
+        ),
+        "training_preflight_gpu_status": (
+            None
+            if preflight_receipt is None
+            else preflight_receipt["gpu_check"]["status"]
+        ),
+        "reviewer": record.get("reviewer") if reviewed else None,
+        "reviewed_at": record.get("reviewed_at") if reviewed else None,
+        "review_status": review_record(item, resolved_scope).get(
+            "review_status"
+        ),
+        "approval_basis": approval_basis,
+        "repair_closure_actor": review_record(item, resolved_scope).get(
+            "repair_closure_actor"
+        ),
+        "repair_closure_at": review_record(item, resolved_scope).get(
+            "repair_closure_at"
+        ),
+        "operational_validator": review_record(item, resolved_scope).get(
+            "operational_validator"
+        ),
+        "operational_validated_at": review_record(item, resolved_scope).get(
+            "operational_validated_at"
+        ),
+        "command": command,
+        "returncode": result.returncode,
+        "slurm_job_id": job_id,
+    }
+    stamp = launched_at.replace(":", "").replace("+00:00", "Z")
+    manifest_path = unique_launch_manifest_path(
+        root / "slurm" / args.experiment_id,
+        stamp,
+        job_id,
+    )
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     if result.returncode != 0:
         raise LedgerError(
             f"launcher exited {result.returncode}; manifest: {manifest_path.relative_to(root)}"

@@ -69,8 +69,8 @@ not the status of the root or longest-running job.
   paths. Do not hide upstream data/cache corruption with downstream patches.
 - Do not change scientific routes/contracts, modify reviewed source during an
   active run, accept/reject results, merge, or cancel for scientific reasons.
-  A new expensive launch still goes through `research-experiment-spec` and
-  the installed agent adapter's independent reviewer.
+  A new expensive launch still goes through `research-experiment-spec`; use
+  independent review only when its material-change gate applies.
 - Escalate only repeated or ambiguous failure, a scientific choice, missing
   authority, or final acceptance. In explicitly non-mutating requests, observe
   and report only.

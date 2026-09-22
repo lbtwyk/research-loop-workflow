@@ -34,8 +34,8 @@ That directory owns the config, model instructions, authentication, mutable
 task state, daemon, and control socket. Start or inspect it through
 `codex-lbtwyk`; the Desktop App can continue to invoke `codex app-server proxy`.
 The owner defaults are `gpt-6-astra` with medium reasoning. Route every Codex
-review through the dedicated read-only `reviewer` agent using `gpt-5.6-luna`,
-max reasoning, and fast service tier. Keep the ordinary Tianhu home and
+review through the dedicated read-only `reviewer` agent using `gpt-6-astra`,
+medium reasoning, and priority service tier. Keep the ordinary Tianhu home and
 `/home/tianhup/.codex/app-server-control/app-server-control.sock`
 assigned to Tianhu. Never repoint, restart, or stop that default daemon as part
 of owner setup or maintenance.

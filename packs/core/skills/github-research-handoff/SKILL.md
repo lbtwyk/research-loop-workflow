@@ -1,12 +1,14 @@
 ---
 name: github-research-handoff
-description: Send evidence-backed research handoffs through GitHub and sync the experiment ledger. Use for Web collaboration, issue decisions, or result handoff.
+description: Sync research outputs to GitHub; update issues or PR discussion for stage results or decisions.
 ---
 
 # GitHub Research Handoff
 
-Turn verified local experiment evidence into a durable GitHub handoff. Keep
-observations, interpretation, and requested decisions distinct.
+Sync finished code, documents, and useful evidence to the repository as they
+become ready so Web can read them. A repository push needs no issue/PR comment
+or Web decision. Update issue/PR discussion for a stage result or a decision
+that is actually needed. Keep observations and interpretation distinct.
 
 ## Workflow
 
@@ -16,10 +18,9 @@ observations, interpretation, and requested decisions distinct.
    experiment identity is missing or changing and `INDEX.md` only for history
    or baseline lookup. If the user says "latest issue", inspect open issues
    before selecting a target.
-2. If an allowed human has already approved a runnable route, do not post
-   another comment asking whether to launch it. Execute or resume through the
-   normal experiment workflow and hand off only completed evidence, a
-   demonstrated failure, or a concrete scientific decision.
+2. If an allowed human has already approved a runnable route, execute or resume
+   it. Sync scoped code, docs, and useful evidence when ready; reserve discussion
+   updates for stage results or concrete scientific decisions.
 3. Re-check scheduler exit states, checkpoint/log paths, metric JSON, eval
    completeness, render manifests, and the exact baselines used. Do not write
    from memory alone.
@@ -28,20 +29,15 @@ observations, interpretation, and requested decisions distinct.
    recommended choices. Read
    [references/comment-template.md](references/comment-template.md) when a
    result comparison or decision request needs a structured comment.
-5. Publish according to the execution mode:
-   - **Interactive:** post through GitHub MCP (`GetDynamicTools` then
-     `CallDynamicTool`) or `gh`. Re-fetch the target, capture the final URL, update the experiment through
-     the ledger, stage only scoped source/docs/tests, and push when authorized.
-   - **Async worker:** write the handoff Markdown under the ignored issue runtime
-     path and return `github_comment_path`. The deterministic controller posts
-     the comment and pushes the clean issue branch. Do not post or push directly.
+5. Push scoped code/docs/evidence when ready. For a stage result, post through
+   GitHub MCP or `gh`, then capture the final URL.
 6. After a confirmed GitHub URL is available, record it in the focused spec
    through the ledger. Do not hand-edit generated ACTIVE or INDEX views.
 
 ## Authority And Quality Bar
 
-- Async evidence handoff does not authorize accepting/rejecting a route,
-  selecting the next hypothesis, merging a branch, or closing the issue.
+- A handoff does not authorize accepting/rejecting a route, selecting the next
+  hypothesis, merging a branch, or closing the issue.
 - Do not treat sample renders as full evaluation or hide missing/partial gates.
 - Include repository-relative artifact paths and a compact comparison table when
   the decision depends on metrics.

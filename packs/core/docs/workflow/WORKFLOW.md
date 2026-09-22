@@ -103,8 +103,9 @@ refactoring, and same-claim revisions stay as routes or runs in the parent.
     that carries it.
 12. The user decides the scientific outcome. The ledger then updates or closes
     the experiment.
-13. GitHub handoff publishes ledger-backed evidence. It does not create a
-    second status record.
+13. Sync finished code, documents, and useful evidence to the repository when
+    ready so Web can read them. Update issue/PR discussion for stage results or
+    needed decisions, not for each repository push.
 
 Keep implementation, scheduler state, runtime proof, and scientific acceptance
 explicitly separate.
@@ -140,7 +141,8 @@ submits a job.
   role.
 - `research-review`: a read-only second perspective when explicitly requested
   or required by the formal review gate.
-- `github-research-handoff`: publish existing evidence and decision requests.
+- `github-research-handoff`: sync research outputs; discuss stage results or
+  needed decisions in issues and PRs.
 - `training-check-acceptance` and `slurm-training-optimizer` belong to the
   slurm pack.
 

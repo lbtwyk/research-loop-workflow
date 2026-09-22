@@ -9,6 +9,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 def load_ledger():
@@ -91,6 +92,27 @@ class CoreLedgerTests(unittest.TestCase):
         ledger.training_preflight = None
         with self.assertRaises(ledger.LedgerError):
             ledger.load_scheduler_adapters()
+
+    def test_launch_review_gate_does_not_require_a_routine_review(self) -> None:
+        source = self.root / "scripts/run.sh"
+        source.parent.mkdir()
+        source.write_text("#!/bin/sh\n", encoding="utf-8")
+        contract_path = self.root / "docs/experiments/contracts/demo.json"
+        contract_path.parent.mkdir()
+        contract_path.write_text("{}\n", encoding="utf-8")
+        item = {
+            "id": "EXP-20260902-demo",
+            "contract_path": "docs/experiments/contracts/demo.json",
+            "review_status": "required",
+        }
+        contract = {"review_paths": ["scripts/run.sh"]}
+        with mock.patch.object(ledger, "contract_errors", return_value=([], contract)):
+            allowed, _, basis = ledger.launch_review_gate(self.root, item)
+            self.assertTrue(allowed)
+            self.assertTrue(basis)
+            item["review_status"] = "blocked"
+            allowed, _, _ = ledger.launch_review_gate(self.root, item)
+            self.assertFalse(allowed)
 
 
 if __name__ == "__main__":
