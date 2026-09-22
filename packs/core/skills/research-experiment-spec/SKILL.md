@@ -51,18 +51,14 @@ route's design, reason, decisive evidence, decision, successor, and artifacts.
   route is closed or handed off as complete, reconcile every declared
   downstream evaluation, render, analysis, and reporting stage against its
   expected artifact and recorded job; preserve unsubmitted stages explicitly.
-- Compile that closure from contract `launch_scopes`, ledger launch manifests,
-  exact `completion_evidence`, and a scheduler snapshot when the slurm pack is
-  installed. The launch packet is read-only; do not create a parallel stage
-  tracker or treat it as scientific acceptance.
+- Compile that closure from contract `launch_scopes`, exact
+  `completion_evidence`, and the installed compute module's runtime records.
+  Do not create a parallel stage tracker or treat runtime completion as
+  scientific acceptance.
 - Preserve commit, environment, command, jobs/logs, parent/cache identity,
   checkpoints, resume point, review basis, failures, metrics, and next action.
-- On a direct-attached GPU, validate changed seams and use the formal run's
-  early evidence as execution proof, typically real-data and optimizer progress
-  plus GPU memory and throughput. Inspect the first scheduled checkpoint when
-  it becomes available. Add a standalone checkpoint/resume or downstream-hook
-  proof when that seam changed, failed, or presents a concrete live risk.
-  Cluster `launch` and `preflight` remain slurm-pack concerns.
+- Use the selected compute module for launch proof, status, recovery, and
+  result delivery. Keep its runtime state separate from scientific acceptance.
 - Update through ledger add/update/close/lint; never hand-edit generated views.
 - Result-to-claim and experiment audit provide decision evidence. Only the user
   accepts an outcome or chooses a successor scientific route.

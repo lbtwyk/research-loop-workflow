@@ -1,7 +1,7 @@
 # Slurm Training Preflight
 
-This is the scheduler implementation of the core
-[PREFLIGHT.md](../../core/docs/workflow/PREFLIGHT.md) interface.
+This is the scheduler implementation of the
+[PREFLIGHT.md](PREFLIGHT.md) interface.
 
 - CPU and GPU checks run through Slurm, not a login node.
 - `gpu_check.mode` may be `local` or `slurm_interactive`.

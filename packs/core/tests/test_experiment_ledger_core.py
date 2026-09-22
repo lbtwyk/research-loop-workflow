@@ -93,6 +93,14 @@ class CoreLedgerTests(unittest.TestCase):
         with self.assertRaises(ledger.LedgerError):
             ledger.load_scheduler_adapters()
 
+    def test_training_contract_does_not_require_slurm_preflight(self) -> None:
+        self.assertEqual(
+            ledger.preflight_contract_errors(
+                "local training", {"execution_kind": "training"}, ["train.py"]
+            ),
+            [],
+        )
+
     def test_launch_review_gate_does_not_require_a_routine_review(self) -> None:
         source = self.root / "scripts/run.sh"
         source.parent.mkdir()

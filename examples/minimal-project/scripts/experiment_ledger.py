@@ -529,7 +529,6 @@ def preflight_contract_errors(
             + ", ".join(sorted(EXECUTION_KINDS))
         )
     launcher_kinds = config.get("launcher_kinds")
-    declares_training = execution_kind == "training"
     if launcher_kinds is not None:
         if not isinstance(launcher_kinds, dict) or not launcher_kinds:
             errors.append(f"{label} launcher_kinds must be a non-empty object")
@@ -553,7 +552,6 @@ def preflight_contract_errors(
                         f"{label} launcher kind for {launcher} must be one of "
                         + ", ".join(sorted(EXECUTION_KINDS))
                     )
-                declares_training = declares_training or kind == "training"
     definition = config.get("training_preflight")
     if definition is not None:
         try:
@@ -565,10 +563,6 @@ def preflight_contract_errors(
             if type(error).__name__ != "PreflightError":
                 raise
             errors.append(f"{label} {error}")
-    if declares_training and definition is None:
-        errors.append(
-            f"{label} explicitly declares training but has no training_preflight"
-        )
     return errors
 
 

@@ -64,13 +64,8 @@ Do not introduce unsolicited warnings, disclaimers, approval flows, or safety/co
   efficiency precision is `UNCERTAIN`, not a launch veto.
 - Reviewers must not request hashes or fingerprints for ordinary source,
   logs, metrics, or renders. Git commit plus dirty paths is enough.
-- On a direct-attached GPU, focused changed-seam checks plus the formal run's
-  early runtime evidence are the default proof. Add standalone checkpoint,
-  resume, downstream-hook, or resource proof when that seam changed, failed, or
-  presents a concrete live risk. Cluster launch and preflight remain slurm-pack
-  concerns.
-- When the user asks to check an approved training task and the slurm pack is
-  installed, use `training-check-acceptance`.
+- Use the installed compute module for launch, preflight, status, and recovery.
+  Record the exact execution identity and evidence in the experiment ledger.
 
 ## HERO Scope Limits
 

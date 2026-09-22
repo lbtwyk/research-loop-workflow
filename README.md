@@ -1,25 +1,28 @@
 # research-loop-workflow
 
-Reusable research loop: one experiment spec, one ledger, independent review,
-then evidence and a user decision. This repository records the workflow and
-skills. It does not contain datasets, models, or experiment results.
+Reusable research loop: one experiment spec, one ledger, evidence, and a user
+decision. Add only the compute and project modules a workspace uses. This
+repository does not contain datasets, models, or experiment results.
 
 Two axes, installed separately:
 
-- Content: `core` / `slurm` / `musics2dance`
+- Research: `core` → `local`, `slurm`, or `kubernetes` → optional project topic
 - Agent: `cursor` / `codex`
 
 ## Install
 
 ```bash
-# New project, Cursor only
-./install.sh --dest /path/to/project --core --agent cursor
+# Local GPU project
+./install.sh --dest /path/to/project --local --agent cursor
 
-# Slurm project
-./install.sh --dest /path/to/project --core --slurm --agent cursor
+# Slurm cluster
+./install.sh --dest /path/to/project --slurm --agent cursor
 
-# Music2Dance on both agents
-./install.sh --dest /path/to/project --core --slurm --topic musics2dance \
+# Kubernetes / KubeSphere cluster
+./install.sh --dest /path/to/project --kubernetes --agent codex
+
+# Music2Dance using local GPUs and both cluster types
+./install.sh --dest /path/to/project --local --slurm --kubernetes --topic musics2dance \
   --agent cursor --agent codex
 ```
 
@@ -37,9 +40,11 @@ Optional paper and process skills: add `--optional`.
 ## Layout
 
 ```text
-packs/core/            agent-neutral workflow, ledger, shared skills
-packs/slurm/           scheduler snapshot, preflight, Slurm skills
-packs/musics2dance/    host skills and environment overlays
+packs/core/            experiment lifecycle, evidence, ledger, shared skills
+packs/local/           direct-attached GPU execution
+packs/slurm/           Slurm scheduling, preflight, training checks
+packs/kubernetes/      Kubernetes/KubeSphere jobs and result delivery
+packs/musics2dance/    project and host overlays
 adapters/cursor/       .cursor rules, hooks, research-reviewer overlay
 adapters/codex/        .codex hooks, agents/openai.yaml
 ```
@@ -53,10 +58,12 @@ python scripts/experiment_ledger.py sync
 python scripts/experiment_ledger.py lint
 ```
 
-`launch` and `preflight` require the slurm pack.
+The ledger's `launch` and `preflight` commands currently require the Slurm
+pack. Local and Kubernetes launches use their own launchers and record runtime
+evidence in the same experiment ledger. Multiple compute packs can coexist.
 
 ## What This Is Not
 
 - Not a copy of Musics2Dance science or experiment records
 - Not a Cursor-only or Codex-only kit
-- Not a cluster policy document unless you install `slurm`
+- Not a site policy document; site details belong in project overlays

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guard contract-matched training launches without injecting thread focus."""
+"""Guard contract-matched Slurm training launches without injecting thread focus."""
 
 from __future__ import annotations
 
@@ -108,12 +108,16 @@ def is_direct_training_launch(
     index = executable_index(words)
     if index is None:
         return False
+    executable = Path(words[index]).name
+    tail = words[index + 1 :]
+    if executable not in {"sbatch", "srun"} and not executable.startswith(
+        ("slurm_train_", "slurm_launch_")
+    ):
+        return False
     if training_markers:
         normalized = {word.removeprefix("./") for word in words}
         if normalized & training_markers:
             return True
-    executable = Path(words[index]).name
-    tail = words[index + 1 :]
     if executable == "sbatch":
         lowered = [token.lower() for token in tail]
         for token in lowered:
@@ -150,22 +154,6 @@ def is_direct_training_launch(
             or token.endswith("/accelerate")
             for token in tail
         )
-    if executable == "torchrun":
-        return True
-    if executable == "accelerate":
-        return bool(tail and tail[0] == "launch")
-    if executable.startswith("python"):
-        return any(Path(token).name.startswith("train_") for token in tail)
-    if executable in {"bash", "sh"}:
-        for token in tail:
-            name = Path(token).name.lower()
-            if name.startswith("slurm_train_"):
-                return True
-            if name.startswith("slurm_launch_"):
-                return not any(
-                    marker in name for marker in ("eval", "render", "select")
-                )
-        return False
     if executable.startswith("slurm_train_"):
         return True
     if executable.startswith("slurm_launch_"):
@@ -263,7 +251,7 @@ def guard_bash(
         return
     experiments = ", ".join(dict.fromkeys(matched_ids))
     reason = (
-        f"Direct training launch matches guarded contract(s): {experiments}. "
+        f"Slurm training launch matches guarded contract(s): {experiments}. "
         "Complete contract-lint and the required scoped "
         "scientific review or operational validation, then use: "
         "python "

@@ -12,8 +12,7 @@ Markdown views are adapters around it.
 | Lifecycle, outcome, current conclusion, latest artifact, next action | `docs/experiments/registry.json` |
 | Frozen data, model, training, evaluation, launcher, and stage semantics | The experiment contract JSON |
 | Independent review decision and evidence | `docs/experiments/reviews/` |
-| Pre-queue executable proof | Ignored scheduler receipt bound to the exact launch |
-| Current scheduler facts | One explicit snapshot, when a scheduler pack is installed |
+| Execution proof and current runtime facts | The selected compute module's receipt, job, session, logs, and artifacts |
 | Current and historical navigation | Generated `ACTIVE.md` and `INDEX.md` |
 
 Do not create parallel trackers such as `EXPERIMENT_LOG.md`,
@@ -84,16 +83,14 @@ refactoring, and same-claim revisions stay as routes or runs in the parent.
    execution change receives one independent read-only review. A first launch,
    new experiment ID, or routine ablation reusing reviewed semantics uses
    focused validation.
-5. If resource shape is still unsettled and a scheduler pack is installed,
-   choose the launch from live evidence. Prefer same-effective-batch sharing,
-   then whole-node exclusive packing, before unmatched batch-size changes.
-6. When a scheduler snapshot exists, compile the exact launch packet. The
-   packet does not submit anything.
-7. On a direct-attached GPU, changed-seam checks plus early formal-run evidence
-   are the default execution proof. Standalone resume, downstream-hook, or
-   resource proof is useful for a changed or failed seam or another concrete
-   live risk. Scheduler-pack preflight remains available for cluster launches.
-8. Launch and durable runtime identity go through the ledger.
+5. Select the installed compute module and prepare the exact launch. Use its
+   resource and preflight rules only where they apply.
+6. Record the command, environment, runtime identity, logs, and expected
+   artifacts in the experiment. The compute module owns submission and live
+   status checks.
+7. Verify actual progress and the declared downstream stages. Reuse the same
+   contract for operational recovery.
+8. Update the ledger with the observed runtime and evidence.
 9. A training check owns the operational loop: inspect, repair demonstrated
    same-contract failures, complete declared stages, and report. It never
    accepts the science.
@@ -110,9 +107,9 @@ refactoring, and same-claim revisions stay as routes or runs in the parent.
 Keep implementation, scheduler state, runtime proof, and scientific acceptance
 explicitly separate.
 
-Cluster preflight is specified in [PREFLIGHT.md](PREFLIGHT.md). `launch` and
-`preflight` require the slurm pack. On a direct-attached GPU, record the exact
-command, durable session/log identity, and early formal-run evidence instead.
+Compute modules: `LOCAL_TRAINING.md` for a direct GPU, `SLURM.md` and
+`PREFLIGHT.md` for Slurm, or `KUBERNETES.md` for Kubernetes/KubeSphere. A
+project may install more than one; choose by the actual execution target.
 
 ## Stage Closure
 
@@ -120,14 +117,9 @@ Use contract `launch_scopes` as the executable stage list. A scope may declare
 `depends_on` and exact `completion_evidence` files. The evidence must be the
 final artifact or receipt, not a broad output directory.
 
-```bash
-python scripts/experiment_ledger.py launch-packet \
-  --scope SCOPE --slurm-snapshot /tmp/research-loop-slurm.json \
-  EXP-ID -- EXACT-LAUNCH-COMMAND
-```
-
-The packet partitions declared scopes into completed or remaining. It never
-submits a job.
+The ledger's stage view partitions declared scopes into completed or remaining.
+It never submits a job. The selected compute module explains any scheduler
+snapshot or launch command.
 
 ## Skill Responsibilities
 
@@ -143,8 +135,8 @@ submits a job.
   or required by the formal review gate.
 - `github-research-handoff`: sync research outputs; discuss stage results or
   needed decisions in issues and PRs.
-- `training-check-acceptance` and `slurm-training-optimizer` belong to the
-  slurm pack.
+- Compute-specific training checks and resource optimization belong to their
+  compute modules.
 
 Novelty and formula work may inform a spec. Neither owns experiment lifecycle.
 

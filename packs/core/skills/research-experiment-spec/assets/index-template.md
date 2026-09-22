@@ -24,5 +24,5 @@ This is a generated view. Use `registry.json` as the lifecycle-metadata source o
 - Read `ACTIVE.md` first, then the relevant complete spec.
 - Create a new spec only for a new falsifiable question, claim, causal intervention, or materially changed frozen contract.
 - Keep seeds, retries, checkpoints, evaluations, renders, and presentation artifacts under their parent experiment.
-- Include the experiment ID in run, Slurm, render, metric, and checkpoint paths when practical.
+- Include the experiment ID in run, render, metric, and checkpoint paths when practical.
 - Never truncate or summarize away prior experiment conclusions.

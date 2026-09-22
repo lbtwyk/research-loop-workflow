@@ -49,11 +49,9 @@ and focused tests. Reviewer-judgment findings use one delta review. Changed
 scientific semantics or contract require full review. Operational-only repairs
 need focused validation, not another scientific review.
 
-On a direct-attached GPU, launch the exact frozen command durably and use early
-formal-run telemetry as execution proof. Add standalone checkpoint/resume,
-downstream-hook, or resource proof for changed or failed seams or another
-concrete live risk. Freeze the contract, reviewed scientific source when review
-was required, exact command, and runtime paths in the experiment record.
+Use the selected compute module to launch the frozen command and check runtime
+proof. Record the contract, reviewed scientific source when review was required,
+exact command, and runtime paths in the experiment.
 
 Always distinguish planned, tested, submitted, allocated, running, completed;
 scheduler evidence from model-quality evidence; and clean provenance from

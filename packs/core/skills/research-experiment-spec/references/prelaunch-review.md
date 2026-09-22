@@ -54,20 +54,10 @@ randomness contract, checkpoint cadence, or exact-resume behavior.
 
 Do not block on speculative micro-optimizations or require proof that every
 possible optimization has been implemented. Record those as follow-up notes.
-Do not submit a separate queued profile job. `sbatch --test-only` validates
-scheduler shape, not runtime efficiency; the formal job supplies runtime
-confirmation.
-
-On a direct-attached GPU, do not require a separate general preflight. Run
-focused checks for changed seams, then use the formal job's early real-data,
-optimizer, memory, throughput, and checkpoint evidence. Test checkpoint/resume
-or downstream hooks separately when those paths changed, failed, or present a
-concrete live risk.
-
-Do not require a numeric resource table for a settled local GPU shape. When
+The selected compute module owns launch checks and runtime measurements. Do
+not require a separate profile solely to complete review paperwork. When
 resource shape changed or evidence indicates OOM, input starvation, throughput,
-or ETA risk, record only the measurements and estimates that can change the
-launch. Do not run a separate profile solely to complete review paperwork.
+or ETA risk, record only measurements that can change the launch.
 
 ## Finding And Output Contract
 

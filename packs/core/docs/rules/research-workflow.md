@@ -14,6 +14,6 @@
 - Review materially changed scientific semantics or demonstrated high-risk
   execution changes once. Routine launches and same-contract repairs use
   focused validation.
-- Launch training through the ledger. Direct `train_*` / `torchrun` of a
-  guarded contract is blocked.
+- Use the selected compute module for launch and live status. Keep the exact
+  command, runtime identity, and evidence in the experiment.
 - After checks, update through `experiment_ledger.py update|close|sync|lint`.
