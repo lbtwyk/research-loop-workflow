@@ -91,9 +91,10 @@ refactoring, and same-claim revisions stay as routes or runs in the parent.
 7. Verify actual progress and the declared downstream stages. Reuse the same
    contract for operational recovery.
 8. Update the ledger with the observed runtime and evidence.
-9. A training check owns the operational loop: inspect, repair demonstrated
-   same-contract failures, complete declared stages, and report. It never
-   accepts the science.
+9. A training check automatically owns the full operational loop: monitor,
+   repair and resume same-contract failures, complete declared stages, evaluate,
+   and issue formal stage reports. It pauses only for a scientific decision or
+   a demonstrated external blocker it cannot repair.
 10. Experiment audit verifies code, artifacts, metric values, provenance, and
     evaluation scope.
 11. Result-to-claim names the strongest supported claim and the comparison
@@ -135,8 +136,9 @@ snapshot or launch command.
   or required by the formal review gate.
 - `github-research-handoff`: sync research outputs; discuss stage results or
   needed decisions in issues and PRs.
-- Compute-specific training checks and resource optimization belong to their
-  compute modules.
+- `training-check-acceptance`: continue approved operational work through a
+  formal result; use the selected compute module for runtime details.
+- Compute-specific resource optimization belongs to its compute module.
 
 Novelty and formula work may inform a spec. Neither owns experiment lifecycle.
 

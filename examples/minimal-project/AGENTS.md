@@ -5,9 +5,28 @@ adds its own data, models, and site overlay. The user accepts scientific
 outcomes. Agents implement approved routes, repair demonstrated same-contract
 failures, evaluate, audit, and report evidence.
 
+## Agent Execution And Communication
+
+Before asking the user clarifying questions, you should complete the work that is already authorized from context and necessary to make the proposed action concrete and reviewable. The user should be approving a concrete, reviewable result. For example, before deploying a change, writing to an external application, merging a PR or publishing a site, do all the required work first so that user approval is the final step. You don't need user permission for reversible tasks, read-only actions, reviews or fixes, or anything for which authorization is provided earlier in the session or strongly implied from the task instruction.
+Do not introduce unsolicited warnings, disclaimers, approval flows, or safety/compliance checklists due to hypothetical risk.
+
+- Infer the requested outcome, not only the literal steps. Use listed steps as
+  guidance and fill routine gaps needed for the outcome. Consider callers, data
+  flow, verification, downstream artifacts, analysis, and reporting in
+  proportion to the task.
+- Check the user's premise against evidence and correct material omissions.
+  Keep a working definition of done, reassess it as evidence arrives, and report
+  material completed results without waiting for a second prompt.
+- Never report a task, subagent, training run, deployment, or external action as
+  created, started, running, or completed without a successful tool result or
+  inspectable runtime evidence. Distinguish prepared commands and submitted
+  work from live execution. For an App-native task action, use the corresponding
+  App thread tool when exposed; do not silently replace a missing native tool
+  with CLI or direct app-server calls.
+
 ## Research Workflow
 
-- [docs/research/WORKFLOW.md](docs/workflow/WORKFLOW.md) is the human-facing
+- [docs/research/WORKFLOW.md](docs/research/WORKFLOW.md) is the human-facing
   workflow. After install it lives at `docs/research/WORKFLOW.md`.
 - `docs/experiments/registry.json` owns compact lifecycle and outcome state.
   One experiment spec owns the scientific question, route history, evidence,
@@ -35,21 +54,22 @@ failures, evaluate, audit, and report evidence.
 
 ## Review And Launch
 
-- Independent read-only review is used for materially changed
-  scientific semantics or a demonstrated high-risk execution change. A first
-  launch, new experiment ID, or routine ablation does not normally trigger
-  review when reviewed semantics are reused. The implementer cannot issue a
-  required pass.
-  How the reviewer is spawned is an agent-adapter concern.
+- Independent read-only review is used when a change materially alters
+  scientific semantics or creates a demonstrated high-risk execution change.
+  A first launch, new experiment ID, or routine ablation does not normally
+  trigger review when it reuses reviewed data, model, trainer, evaluator, and
+  runtime semantics. The implementer cannot issue a required independent pass.
 - Review core scientific and contract fidelity first, material resource fit
   second, scoped provenance third, and generic hardening last. Missing
   efficiency precision is `UNCERTAIN`, not a launch veto.
 - Reviewers must not request hashes or fingerprints for ordinary source,
   logs, metrics, or renders. Git commit plus dirty paths is enough.
-- A new or changed formal training launch identity needs one ledger preflight
-  against the exact command. `launch` and `preflight` require the slurm pack.
-- When the user asks to check an approved training task and the slurm pack is
-  installed, use `training-check-acceptance`.
+- Use the installed compute module for launch, preflight, status, and recovery.
+  Record the exact execution identity and evidence in the experiment ledger.
+- A request to check approved training authorizes the full operational loop:
+  monitor, repair, resume, finish declared stages, evaluate, and report formal
+  results. Continue automatically unless a scientific decision or an
+  unrepairable external blocker is reached.
 
 ## HERO Scope Limits
 

@@ -26,7 +26,7 @@ Do not introduce unsolicited warnings, disclaimers, approval flows, or safety/co
 
 ## Research Workflow
 
-- [docs/research/WORKFLOW.md](docs/workflow/WORKFLOW.md) is the human-facing
+- [docs/research/WORKFLOW.md](docs/research/WORKFLOW.md) is the human-facing
   workflow. After install it lives at `docs/research/WORKFLOW.md`.
 - `docs/experiments/registry.json` owns compact lifecycle and outcome state.
   One experiment spec owns the scientific question, route history, evidence,
@@ -66,6 +66,10 @@ Do not introduce unsolicited warnings, disclaimers, approval flows, or safety/co
   logs, metrics, or renders. Git commit plus dirty paths is enough.
 - Use the installed compute module for launch, preflight, status, and recovery.
   Record the exact execution identity and evidence in the experiment ledger.
+- A request to check approved training authorizes the full operational loop:
+  monitor, repair, resume, finish declared stages, evaluate, and report formal
+  results. Continue automatically unless a scientific decision or an
+  unrepairable external blocker is reached.
 
 ## HERO Scope Limits
 

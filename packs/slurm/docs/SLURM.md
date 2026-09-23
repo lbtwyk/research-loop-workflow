@@ -15,4 +15,5 @@ job recovery, and stage execution.
    from experiment acceptance.
 
 [TRAINING_EFFICIENCY.md](TRAINING_EFFICIENCY.md) covers resource choices.
-`training-check-acceptance` owns a requested check-and-act cycle.
+The core `training-check-acceptance` skill owns the automatic operational loop;
+this module supplies its Slurm status, preflight, launch, and recovery details.
