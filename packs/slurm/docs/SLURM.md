@@ -7,9 +7,13 @@ job recovery, and stage execution.
 1. Read the project's site overlay for partitions, reservations, limits, and
    storage. Do not apply another site's settings.
 2. Use `slurm_state_snapshot.py` for current queue facts and the ledger's
-   `launch-packet` to inspect declared stages before submission.
-3. For training, run or reuse the exact-command preflight described in
-   [PREFLIGHT.md](PREFLIGHT.md). Submit through the ledger's `launch` command.
+   `launch-packet` to inspect declared stages before submission. List a normal
+   request and viable faster resource shapes, then select by time to the
+   declared result. [TRAINING_EFFICIENCY.md](TRAINING_EFFICIENCY.md) owns this
+   comparison.
+3. Run or reuse the exact-command correctness preflight for the selected
+   shape as described in [PREFLIGHT.md](PREFLIGHT.md). Submit formal training
+   through the ledger's `launch` command.
 4. Track the real job state, log, checkpoint, and downstream stages. Recover
    demonstrated same-contract failures; keep scheduler completion separate
    from experiment acceptance.

@@ -59,8 +59,10 @@ python scripts/experiment_ledger.py lint
 ```
 
 The ledger's `launch` and `preflight` commands currently require the Slurm
-pack. Local and Kubernetes launches use their own launchers and record runtime
-evidence in the same experiment ledger. Multiple compute packs can coexist.
+pack. Local training still runs a short real end-to-end preflight through its
+project launcher. Kubernetes validates and probes a Job on the target cluster.
+Both record their evidence in the same experiment ledger. Multiple compute
+packs can coexist.
 
 ## What This Is Not
 

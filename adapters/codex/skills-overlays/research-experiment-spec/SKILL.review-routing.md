@@ -59,11 +59,11 @@ route's design, reason, decisive evidence, decision, successor, and artifacts.
   do not create a parallel stage tracker or treat it as scientific acceptance.
 - Preserve commit, environment, command, jobs/logs, parent/cache identity,
   checkpoints, resume point, review basis, failures, metrics, and next action.
-- On a direct-attached GPU, validate changed seams and use the formal run's
-  early real-data, optimizer, memory, throughput, and checkpoint evidence as
-  execution proof. Require standalone resume, downstream-hook, or resource
-  proof when that seam changed, failed, or presents a concrete live risk.
-  Cluster launch/preflight remains scheduler-pack policy.
+- Before direct-attached GPU training, run a short real-data preflight through
+  one update, checkpoint reload, and declared downstream entrypoints on tiny
+  inputs. Use early formal-run evidence to confirm continued progress. For a
+  cluster launch, compare normal and viable faster resource shapes, then prove
+  the selected exact command on the target scheduler.
 - Update through ledger add/update/close/lint; never hand-edit generated views.
 - Result-to-claim and experiment audit provide decision evidence. Only the user
   accepts an outcome or chooses a successor scientific route.
@@ -74,7 +74,7 @@ For materially changed scientific semantics or a demonstrated high-risk
 execution change, read
 [prelaunch review](references/prelaunch-review.md) and
 [lifecycle and review](references/lifecycle-and-review.md). Use one read-only
-`reviewer` agent, configured as `gpt-6-astra` with medium reasoning and priority
+`reviewer` agent, configured as `gpt-6-sol` with high reasoning and priority
 service tier, and follow its impact-priority rubric: core logic first,
 live material efficiency/resource risk second, scoped provenance third, and
 generic hardening last. A first launch, new experiment ID, or routine ablation

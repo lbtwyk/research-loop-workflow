@@ -57,8 +57,10 @@ route's design, reason, decisive evidence, decision, successor, and artifacts.
   scientific acceptance.
 - Preserve commit, environment, command, jobs/logs, parent/cache identity,
   checkpoints, resume point, review basis, failures, metrics, and next action.
-- Use the selected compute module for launch proof, status, recovery, and
-  result delivery. Keep its runtime state separate from scientific acceptance.
+- Before formal training, use the selected compute module's preflight: a small
+  real end-to-end run locally; on a cluster, also compare normal and viable
+  faster resource shapes before the exact launch proof. Keep runtime state
+  separate from scientific acceptance.
 - Update through ledger add/update/close/lint; never hand-edit generated views.
 - Result-to-claim and experiment audit provide decision evidence. Only the user
   accepts an outcome or chooses a successor scientific route.

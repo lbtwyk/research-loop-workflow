@@ -4,7 +4,8 @@ This is the scheduler implementation of the
 [PREFLIGHT.md](PREFLIGHT.md) interface.
 
 - CPU and GPU checks run through Slurm, not a login node.
-- `gpu_check.mode` may be `local` or `slurm_interactive`.
+- Target-cluster GPU proof uses `gpu_check.mode=slurm_interactive`. Legacy
+  `local` mode proves only a direct GPU, not Slurm execution.
 - `slurm_interactive` must use `srun --ntasks=1` and either
   `--jobid` with `--exact --exclusive`, or
   `--reservation=$RESEARCH_LOOP_SLURM_RESERVATION` (default `interactive`)

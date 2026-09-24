@@ -39,7 +39,14 @@ reservations, partitions, pending reasons, scheduler parameters, and recent
 accounting. Inspect a specific job further only when a missing field could
 change the launch. Never infer another user's entitlement.
 
-Choose one coherent route in this order:
+For a new or unsettled training launch, compare the ordinary request with one
+or two viable faster resource shapes. Use matched prior runs when available;
+otherwise make only short probes that can change the choice. Record queue wait,
+effective update throughput, memory/headroom, and estimated time to all
+declared stages for each shape. Keep the scientific contract fixed and select
+the fastest viable time to result, with the ordinary request as fallback.
+
+Build those candidates in this order:
 
 1. Reuse free resources inside a verified dispatcher allocation. A plain batch
    job and node-idle GPUs outside fixed `AllocTRES` are not reusable.
@@ -74,8 +81,9 @@ python scripts/experiment_ledger.py launch-packet \
 ```
 
 When implementation is authorized, change only the operational launcher or
-preflight surface, run focused validation, and use the normal ledger
-preflight/launch path. Do not submit, cancel, or requeue without authority.
+preflight surface, run the selected exact-command correctness preflight, and
+use the normal ledger launch path. This skill does not authorize changing a
+scientific contract or canceling unrelated jobs.
 
 ## Close The Efficiency Loop
 
@@ -100,8 +108,9 @@ modifies the launch. Runtime evidence stays with normal logs/artifacts and the
 experiment execution snapshot. Do not create a tracker, scorecard, or repeated
 self-audit.
 
-Report the selected command/shape, snapshot time, evidence that determined the
-choice, launch/preflight state, and the final `keep`/`change`/`unknown` closure.
+Report the normal and selected shapes, snapshot time, evidence and estimated
+time to result for each, launch/preflight state, and the final
+`keep`/`change`/`unknown` closure.
 Separate scheduler facts, inferred benefit, runtime proof, and scientific
 acceptance.
 

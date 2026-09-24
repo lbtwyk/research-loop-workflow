@@ -83,8 +83,10 @@ refactoring, and same-claim revisions stay as routes or runs in the parent.
    execution change receives one independent read-only review. A first launch,
    new experiment ID, or routine ablation reusing reviewed semantics uses
    focused validation.
-5. Select the installed compute module and prepare the exact launch. Use its
-   resource and preflight rules only where they apply.
+5. Select the installed compute module and run its preflight before formal
+   training. Local preflight checks a small real end-to-end path. Cluster
+   preflight also compares a normal resource setup with viable faster setups
+   before selecting the exact launch.
 6. Record the command, environment, runtime identity, logs, and expected
    artifacts in the experiment. The compute module owns submission and live
    status checks.
@@ -109,8 +111,10 @@ Keep implementation, scheduler state, runtime proof, and scientific acceptance
 explicitly separate.
 
 Compute modules: `LOCAL_TRAINING.md` for a direct GPU, `SLURM.md` and
-`PREFLIGHT.md` for Slurm, or `KUBERNETES.md` for Kubernetes/KubeSphere. A
-project may install more than one; choose by the actual execution target.
+`PREFLIGHT.md` for Slurm, or `KUBERNETES.md` for Kubernetes/KubeSphere. The
+ledger's `preflight` command is currently Slurm-specific; local and Kubernetes
+use the selected module's launchers and record their preflight evidence in the
+same experiment. A project may install more than one module.
 
 ## Stage Closure
 

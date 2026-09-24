@@ -66,6 +66,9 @@ Do not introduce unsolicited warnings, disclaimers, approval flows, or safety/co
   logs, metrics, or renders. Git commit plus dirty paths is enough.
 - Use the installed compute module for launch, preflight, status, and recovery.
   Record the exact execution identity and evidence in the experiment ledger.
+- Local preflight briefly exercises the real training and declared downstream
+  paths. Cluster preflight also compares a normal resource setup with viable
+  faster setups before selecting the formal launch.
 - A request to check approved training authorizes the full operational loop:
   monitor, repair, resume, finish declared stages, evaluate, and report formal
   results. Continue automatically unless a scientific decision or an

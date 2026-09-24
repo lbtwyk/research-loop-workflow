@@ -2,9 +2,12 @@
 
 > Slurm training launch proof. Local GPU and Kubernetes use their own modules.
 
-Training preflight is one executable proof for a new or changed formal launch
-identity. Reuse the passing receipt while the identity is unchanged. It is not
-a miniature experiment.
+Cluster preflight has two parts: compare a normal resource request with viable
+faster shapes using [TRAINING_EFFICIENCY.md](TRAINING_EFFICIENCY.md), then run
+the executable correctness proof for the selected exact launch. The ledger's
+`preflight` command implements the latter and reuses its passing receipt while
+that launch identity is unchanged. Short resource probes are useful only when
+they can change the choice; they do not replace the correctness proof.
 
 The Slurm pack supplies the scheduler implementation.
 
@@ -35,8 +38,8 @@ a training entrypoint. A scope that owns one kind of launcher may use
       }
     ],
     "gpu_check": {
-      "mode": "local",
-      "command": "python train_route.py --gpu-preflight ..."
+      "mode": "slurm_interactive",
+      "command": "srun --ntasks=1 --jobid=<verified-allocation> --exact --exclusive python train_route.py --gpu-preflight ..."
     }
   }
 }
@@ -55,9 +58,11 @@ Across the declared CPU checks the command must prove:
 Synthetic tensors, import-only tests, `--dry-run`, and a forward without
 optimizer or checkpoint proof do not satisfy the interface.
 
-`gpu_check.mode` is `local` or `slurm_interactive`. An immediate GPU probe
-may be recorded as `skipped_unavailable` only if the program never starts.
+Use `slurm_interactive` for target-cluster proof. The implementation also
+accepts `local` for legacy direct-GPU use, which does not prove Slurm execution.
+An immediate GPU probe may be recorded as `skipped_unavailable` only if the
+program never starts.
 Once the GPU program starts, failure is real and blocks submission.
 
-Ledger commands `preflight` and `launch` load the slurm pack. Without that
-pack they refuse instead of inventing a local substitute.
+Ledger commands `preflight` and `launch` load the Slurm pack. The local and
+Kubernetes modules use their own preflight paths.

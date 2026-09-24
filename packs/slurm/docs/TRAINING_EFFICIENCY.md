@@ -1,7 +1,19 @@
 # Training Efficiency
 
-Observe once, choose placement or packing, compile the launch packet, then
-close the decision as `keep`, `change`, or `unknown` from normal logs.
+For a new or unsettled cluster launch, list the ordinary resource request and
+one or two viable faster shapes. Compare expected queue wait plus time to the
+declared result, not GPU count or isolated step speed. Use recent matched
+runtime evidence first; run short, bounded probes only when the choice remains
+open. Preserve the scientific batch, optimizer, seed, update budget, inputs,
+and evaluation scope across candidates.
+
+Record for each candidate: GPUs and memory, placement/queue, expected wait,
+measured or inferred update throughput, total time to result, failure risk,
+and evidence. Mark estimates as estimates. Select the fastest viable shape,
+keep the ordinary one as fallback, then run the exact-launch correctness
+preflight. Recheck the choice only when workload or scheduler facts change.
+
+Resource choices may close as `keep`, `change`, or `unknown` from normal logs.
 
 ## Order
 

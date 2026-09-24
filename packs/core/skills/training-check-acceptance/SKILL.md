@@ -27,6 +27,8 @@ authorized operational work remains.
    cause, make the smallest same-contract operational repair, resume, and verify
    new progress. Repeat this loop as needed; a repeated failure calls for deeper
    diagnosis, not a handoff to the user.
+   Before resubmission, rerun the selected compute module's preflight when the
+   operational fix changes the path it previously proved.
 4. Automatically run every missing training, evaluation, render, analysis, and
    report stage whose dependencies are satisfied. Preserve the frozen
    scientific contract, full evaluation scope, checkpoint lineage, and exact
