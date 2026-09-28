@@ -76,6 +76,6 @@ The 2026-09-28 plain-text memory snapshot is in
 [`backups/5090-codex-memory-20260928/`](backups/5090-codex-memory-20260928/).
 
 The complete 2026-09-15 through 2026-09-28 Codex conversations are being uploaded
-as an encrypted compressed archive to the
+as an ordinary compressed archive to the
 [`backup/5090-codex-20260928` branch](https://github.com/lbtwyk/research-loop-workflow/tree/backup/5090-codex-20260928/backups/5090-codex-20260928).
 That branch contains the restore instructions and checksum files.
