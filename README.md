@@ -70,10 +70,7 @@ packs can coexist.
 - Not a Cursor-only or Codex-only kit
 - Not a site policy document; site details belong in project overlays
 
-## 5090 Codex Backup
+## 5090 Codex Memory
 
-The encrypted 2026-09-28 backup of the 5090 machine's Codex memories and
-recent two weeks of conversations is on the
-[`backup/5090-codex-20260928` branch](https://github.com/lbtwyk/research-loop-workflow/tree/backup/5090-codex-20260928/backups/5090-codex-20260928).
-The branch README has integrity checks and Mac restoration steps. The matching
-Mac SSH private key is required to decrypt it.
+The 2026-09-28 plain-text memory snapshot is in
+[`backups/5090-codex-memory-20260928/`](backups/5090-codex-memory-20260928/).

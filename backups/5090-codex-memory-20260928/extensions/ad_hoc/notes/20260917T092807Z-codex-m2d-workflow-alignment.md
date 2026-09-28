@@ -1,0 +1,7 @@
+# Codex and Musics2Dance workflow alignment (2026-09-17)
+
+- The canonical research-workflow source is `lbtwyk/research-loop-workflow` on GitHub. Local `/home/wangyukun/research-loop-workflow` was fetched and matched `origin/main` at commit `82996a3` on 2026-09-17.
+- Codex personal skills were installed from that source with the core, Slurm, Musics2Dance, optional, and Codex adapter selections. A post-install comparison found 75 corresponding files with no differences. Keep machine-specific `~/.codex/config.toml` and `~/.codex/AGENTS.md` separate from the public source.
+- The Musics2Dance workspace is `/home/wangyukun/ubt_isaac_sim_ws/m2d-ws`. Its workspace guidance is `m2d-ws/AGENTS.md`; the private project clone is `m2d-ws/Musics2Dance` with its own `AGENTS.md`.
+- For this user, communicate progress and results in simple, direct Chinese; distinguish downloaded assets, runnable local setup, submitted cluster work, running jobs, and accepted results using current evidence.
+- The local Codex memory directory `/home/wangyukun/.codex/memories` is a Git repository but had no remote configured on 2026-09-17. The user identified the private HF bucket backup `hf://buckets/wyksdsg/musics2dance-server-private/20260908/agents/agent-context-private.tar.gz` from another machine. That historical archive was kept intact. A separate, small snapshot of current local memory and AGENTS files was placed at `hf://buckets/wyksdsg/musics2dance-server-private/20260917/agents/codex-memory-and-agents-20260917.tar.gz` after a credential-pattern check.
