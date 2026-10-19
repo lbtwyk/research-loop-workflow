@@ -10,6 +10,11 @@ This is the scheduler implementation of the
   `--jobid` with `--exact --exclusive`, or
   `--reservation=$RESEARCH_LOOP_SLURM_RESERVATION` (default `interactive`)
   plus an explicit `--immediate` timeout.
+- On Isambard a new `interactive` reservation allocation must not specify
+  `--partition` or override `--qos`; Slurm selects the hidden partition.
+  Inspect it with `squeue --all`, `sinfo --all`, and
+  `scontrol show partition --all`. Verify access with a bounded probe, not
+  `Accounts=root` alone.
 - An unavailable immediate GPU is `skipped_unavailable` and must never enter
   the queue. A started GPU program failure is real and blocks submission.
 - Receipts bind the exact command, scope, review basis, and definition.
@@ -21,3 +26,8 @@ For an unsettled shape, `launch-packet --resource-candidates FILE` also loads
 comparable feasible time to result. This read-only calculation is not a GPU
 preflight, budget authorization, or permission to change running jobs. Observe
 allocation and execution-step usage separately; unknown usage is not zero.
+
+A receipt's top-level `passed` can mean the submission gate permits a
+resource-unavailable skip. Report each CPU/GPU check's actual execution status;
+do not call `skipped_unavailable` an executed proof. Invalid account,
+reservation, partition or QoS is a configuration failure, not a resource skip.

@@ -64,6 +64,21 @@ project launcher. Kubernetes validates and probes a Job on the target cluster.
 Both record their evidence in the same experiment ledger. Multiple compute
 packs can coexist.
 
+## Isambard Interactive Preflight
+
+Use `--reservation=interactive` without `--partition` or QoS overrides for
+short preflight; Slurm selects the hidden partition. Queue and partition
+inspection must include `--all`. Verify access with a bounded probe rather
+than treating reservation display fields as denial. Long-running or
+high-throughput training belongs in ordinary `workq`.
+See [the site overlay](packs/slurm/docs/isambard-site.md).
+
+Run scheduler-independent regression checks with:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 Slurm resource selection defaults to the lowest billed node-hour cost within
 10% of the fastest comparable feasible time to all remaining results. The
 snapshot expands job arrays and retains execution-step usage separately from

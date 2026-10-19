@@ -10,8 +10,12 @@ python scripts/experiment_ledger.py launch-packet \
   EXP-ID -- EXACT-LAUNCH-COMMAND
 ```
 
-On Isambard, read `packs/slurm/docs/isambard-site.md` before naming
-`workq`, `--reservation=interactive`, or `interactive_qos`.
+On Isambard, read the installed `docs/research/isambard-site.md` (source:
+`packs/slurm/docs/isambard-site.md`) before naming `workq`,
+`--reservation=interactive`, or `interactive_qos`. For short preflight use
+reservation-only routing without partition or QoS overrides. Inspect hidden
+partitions with `--all`; verify access with a bounded probe rather than
+inferring denial from `Accounts=root` alone. Long-running training uses workq.
 
 For a new or unsettled resource choice, follow `TRAINING_EFFICIENCY.md`: compare
 the same remaining declared results, respect authorized limits, and select the

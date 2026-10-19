@@ -33,8 +33,7 @@ MIN_SLURM_IMMEDIATE_SECONDS = 5
 GPU_UNAVAILABLE_MARKERS = (
     "can't run immediately",
     "cannot run immediately",
-    "unable to allocate resources",
-    "requested node configuration is not available",
+    "requested nodes are busy",
     "required node not available",
     "nodes required for job are down, drained or reserved",
 )
@@ -120,6 +119,14 @@ def _validate_interactive_srun(command: str, *, label: str) -> None:
         raise PreflightError(
             f"{label} must use either srun --jobid=JOB_ID or "
             f"srun --reservation={required_reservation()}"
+        )
+
+    if reservation == "interactive" and _has_option(
+        tokens, "--partition", "-p", "--qos", "-q"
+    ):
+        raise PreflightError(
+            f"{label} must let --reservation=interactive select its partition "
+            "and QoS; do not specify --partition or --qos"
         )
 
     immediate_value = _option_value(tokens, "--immediate")
@@ -235,6 +242,8 @@ def validate_definition(value: object) -> dict[str, object]:
 
 def gpu_allocation_unavailable(stdout: str, stderr: str) -> bool:
     text = f"{stdout}\n{stderr}".lower()
+    if "has been allocated resources" in text:
+        return False
     return any(marker in text for marker in GPU_UNAVAILABLE_MARKERS)
 
 

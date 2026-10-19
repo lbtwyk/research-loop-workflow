@@ -60,7 +60,11 @@ Across the declared CPU checks the command must prove:
 Synthetic tensors, import-only tests, `--dry-run`, and a forward without
 optimizer or checkpoint proof do not satisfy the interface.
 
-Use `slurm_interactive` for target-cluster proof. The implementation also
+Use `slurm_interactive` for target-cluster proof. On Isambard, new allocation
+commands set `--reservation=interactive` without `--partition` or `--qos`;
+Slurm routes them to the hidden partition. Inspect hidden resources with
+`--all` and test access with a bounded probe; `Accounts=root` alone does
+not establish denial. See [isambard-site.md](isambard-site.md). The implementation also
 accepts `local` for legacy direct-GPU use, which does not prove Slurm execution.
 An immediate GPU probe may be recorded as `skipped_unavailable` only if the
 program never starts.

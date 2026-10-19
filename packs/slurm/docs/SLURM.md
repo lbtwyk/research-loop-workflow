@@ -5,7 +5,10 @@ experiment and scientific decision; this module owns queue facts, launch proof,
 job recovery, and stage execution.
 
 1. Read the project's site overlay for partitions, reservations, limits, and
-   storage. Do not apply another site's settings.
+   storage. Do not apply another site's settings. Include hidden partitions
+   with `--all`; do not infer account denial from reservation display fields
+   alone. On Isambard use reservation-only routing for short preflight and
+   ordinary `workq` for long-running training.
 2. Use `slurm_state_snapshot.py` for current queue facts and the ledger's
    `launch-packet` to inspect declared stages before submission. List a normal
    request and viable alternatives, then select the lowest billed cost within

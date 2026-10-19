@@ -42,10 +42,10 @@ Do not use this for non-Slurm tasks, generic repo editing, or finished-output ve
 ## Procedure
 
 1. If the question is “what jobs are waiting,” start with the pending-only queue view:
-   - `squeue -u "$USER" -t PD -o "%.18i %.9P %.32j %.8u %.2t %.12M %.12l %.6D %R"`
+   - `squeue --all -u "$USER" -t PD -o "%.18i %.9P %.32j %.8u %.2t %.12M %.12l %.6D %R"`
 
 2. If the user may also care about running jobs, broaden immediately:
-   - `squeue -u "$USER" -o "%.18i %.9P %.32j %.8u %.2t %.12M %.12l %.6D %R"`
+   - `squeue --all -u "$USER" -o "%.18i %.9P %.32j %.8u %.2t %.12M %.12l %.6D %R"`
 
 3. If they ask “what about sacct” or want recent history, use:
    - `sacct -u "$USER" --starttime today --format=JobID,JobName%32,State,Elapsed,Start,End,NodeList%24 -X`
@@ -90,11 +90,16 @@ Do not use this for non-Slurm tasks, generic repo editing, or finished-output ve
    - If `StdOut` is already known from `scontrol`, stop searching and hand back `tail -f`.
    - If `AssocGrpCPUMinutesLimit` is reproduced, stop micro-tuning walltime and report the quota block.
 
+On Isambard, `--all` includes the hidden interactive partition. `PrivateData`
+may hide other users' jobs and accounts; do not infer group usage from an
+empty peer query. Use reservation-only submission routing as documented in
+the site's overlay.
+
 ## Pitfalls and fixes
 
 - Symptom: the answer only mentions waiting jobs, but the user also wants the active run.
   - Likely cause: stopping after the pending-only `squeue` view
-  - Fix: broaden to full `squeue -u "$USER"` and then `sacct`
+  - Fix: broaden to full `squeue --all -u "$USER"` and then `sacct`
 
 - Symptom: the answer guesses where the log should be instead of giving the real file.
   - Likely cause: relying on repo path conventions instead of scheduler metadata

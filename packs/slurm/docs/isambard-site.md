@@ -4,16 +4,32 @@ Use this only on Isambard-AI. Other Slurm sites should replace it.
 
 | Term | Meaning |
 |---|---|
-| `workq` | Ordinary queue, 1.0× NHR, up to 24h |
-| `--reservation=interactive` | Reserved node pool, 1.5× NHR, official 1-job cap, 8h |
-| `interactive_qos` | Separate one-allocation QoS on that reserved pool |
+| `workq` | Ordinary training/batch queue; no interactive reservation |
+| `--reservation=interactive` | Short-lived preflight, debugging and exploratory work; 1.5x NHR, up to 4 nodes / 8h |
+| `interactive` partition | Hidden partition selected automatically by the reservation |
+| `interactive_qos` | Partition QoS enforcing reservation limits; inspect live values |
 
-Do not say `interactive` alone. Reservation jobs bill at 1.5× NHR even when
-they also use `workq` and `normal`. A per-user cap is an allocation limit, not
-a worktree or training-task limit.
+For new reservation allocations, set only `--reservation=interactive`;
+do not specify `--partition` or override `--qos`. Slurm selects the hidden
+partition and its limits. Long-running or high-throughput formal workloads
+belong in ordinary `workq`, not this reservation.
+
+Use `squeue --all`, `sinfo --all` and `scontrol show partition --all` to
+include hidden resources. With `PrivateData` enabled, other users' accounts
+and jobs may be invisible; an empty peer query is not evidence of no usage.
+
+Do not infer reservation access from `Accounts=root`, a missing partition in
+the default view, or the absence of `interactive_qos` in association QoS.
+Use a bounded, correctly routed probe under the current project account.
+On 2026-10-14, job 7413875 using `brics.u6ym` and reservation alone entered
+partition `interactive`, saw a GH200 and completed with exit 0 despite
+`Accounts=root` being displayed. This proves that account's access at that
+time, not another user's entitlement or a future allocation.
 
 Set `RESEARCH_LOOP_SLURM_RESERVATION=interactive` unless the site overlay
-changes the pool name.
+changes the pool name. Immediate preflight commands require an explicit
+`--immediate=N` spanning the scheduler cycle; allocation failure and program
+failure are different outcomes.
 
 ## Cost And Allocation
 
