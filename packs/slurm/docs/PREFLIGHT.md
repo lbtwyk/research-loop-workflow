@@ -3,7 +3,9 @@
 > Slurm training launch proof. Local GPU and Kubernetes use their own modules.
 
 Cluster preflight has two parts: compare a normal resource request with viable
-faster shapes using [TRAINING_EFFICIENCY.md](TRAINING_EFFICIENCY.md), then run
+alternatives using [TRAINING_EFFICIENCY.md](TRAINING_EFFICIENCY.md), selecting
+the lowest billed cost within 10% of the fastest comparable feasible time to
+all remaining results under authorized limits, then run
 the executable correctness proof for the selected exact launch. The ledger's
 `preflight` command implements the latter and reuses its passing receipt while
 that launch identity is unchanged. Short resource probes are useful only when

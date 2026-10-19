@@ -12,3 +12,12 @@ python scripts/experiment_ledger.py launch-packet \
 
 On Isambard, read `packs/slurm/docs/isambard-site.md` before naming
 `workq`, `--reservation=interactive`, or `interactive_qos`.
+
+For a new or unsettled resource choice, follow `TRAINING_EFFICIENCY.md`: compare
+the same remaining declared results, respect authorized limits, and select the
+lowest billed cost within 10% of the fastest feasible time to result. Add
+`--resource-candidates FILE` to the read-only packet using that snapshot's
+`captured_at`. Unknown estimates remain unranked/advisory. Reconsider at useful
+stage/checkpoint boundaries; validate future launches without modifying running
+frozen jobs. Array elements and execution-step usage remain separate from
+allocation-level accounting in the snapshot.

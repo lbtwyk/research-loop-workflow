@@ -68,7 +68,10 @@ Do not introduce unsolicited warnings, disclaimers, approval flows, or safety/co
   Record the exact execution identity and evidence in the experiment ledger.
 - Local preflight briefly exercises the real training and declared downstream
   paths. Cluster preflight also compares a normal resource setup with viable
-  faster setups before selecting the formal launch.
+  alternative setups before selecting the formal launch. The Slurm module
+  defaults to lowest billed cost within 10% of the fastest feasible time to all
+  remaining declared results; apply validated changes to future submissions,
+  never running frozen jobs.
 - A request to check approved training authorizes the full operational loop:
   monitor, repair, resume, finish declared stages, evaluate, and report formal
   results. Continue automatically unless a scientific decision or an

@@ -2,14 +2,18 @@
 
 ## Decision Table
 
+These are candidates, not a fixed preference order. Apply the installed
+`TRAINING_EFFICIENCY.md` policy: among comparable feasible shapes within 10% of
+the fastest time to all remaining results, select the lowest billed cost.
+Respect existing budget, concurrency and deadline limits before comparison.
+
 | Situation | Prefer | Do not use when |
 |---|---|---|
 | GPU preflight on Isambard | `--reservation=interactive` plus `--immediate` | Never omit the bounded deadline |
 | Current user already has a running reservation job | Join uncommitted resources already in its fixed `AllocTRES` with `srun --jobid=JOB_ID --exact --exclusive --ntasks=1` | Owner, `Reservation=interactive`, running state, allocated shape, or remaining walltime is not verified |
-| Authorized formal workload that fits 8h / 4 nodes | Reservation allocation with packed exclusive steps; accept 1.5× NHR | The scheduler rejects the shape or time, or ordinary `workq` would finish sooner after queue wait |
-| Long authorized formal workload on the reservation | Background `sbatch --reservation=interactive` | The run must fail immediately rather than queue, or needs more than 8 hours |
+| Long-running or high-throughput formal workload | Ordinary `workq` without the interactive reservation | Do not move it to the short-lived pool |
 | Exact-resume training with a useful short interval | `--time` maximum, `--time-min` useful minimum, pre-timeout signal | Resume is approximate, incomplete, or a shortened run is useless |
-| Low SM% / unused HBM on an independent same-contract process | Same-effective-batch CUDA MPS on one GPU | Host RSS * n exceeds `--mem-per-gpu`, JAX MPS is excluded, or the pair has no canary |
+| Independent compute process leaves usable GPU capacity | Matched same-effective-batch MPS candidate | Combined host/HBM/shared memory does not fit, real-time/no-MPS contract, or no useful measured gain |
 | Many independent short one-GPU tasks | One multi-GPU allocation with concurrent exclusive steps | Mutable state overlaps or one step failure cannot be surfaced |
 | Matched comparison still untrained, user approved | Raise `batch_size` on every compared route/seed together | A running trajectory, or one side of an already-trained control |
 | Eligible tasks exceed live per-user backfill test cap | Pack tasks or submit bounded waves | The cap is unverified or dependencies require the full graph |
@@ -18,15 +22,22 @@
 
 ## Live Diagnosis
 
+`slurm_state_snapshot.py` uses `squeue --all --array` and one `sacct` query
+including execution steps. Keep allocation records separate from step usage;
+do not use `sacct -X` for MaxRSS/CPU/GPU utilization. Unknown is not zero and a
+failed step query cannot prove unused allocation capacity. Estimate billed cost
+from actual AllocTRES and site rules, not smaller requested CPU counts. Use
+eligible-to-start history for queue estimates, not dependency wait as runnable
+queue delay. Snapshot start/end times describe an interval, not atomic state.
+
 Read scheduler facts with:
 
 ```bash
-squeue -u "$USER" -o '%.18i %.9P %.28j %.8T %.10M %.10l %.6D %R'
-scontrol show config | rg 'SchedulerType|SchedulerParameters|Priority|Preempt'
+squeue --all -u "$USER" -o '%.18i %.9P %.28j %.8T %.10M %.10l %.6D %R'
+scontrol show config | rg 'SchedulerType|SchedulerParameters|Priority|Preempt|PrivateData'
 sdiag
-sinfo -Nel
-scontrol show partition workq
-scontrol show qos
+sinfo --all -Nel
+scontrol show partition --all
 scontrol show reservation interactive
 sacctmgr -nP show qos format=Name,Priority,MaxJobsPU,MaxSubmitJobsPU,MaxTRES,MaxWall,UsageFactor,Flags
 ```
@@ -51,6 +62,17 @@ All executable Isambard preflight layers use Slurm. This includes real-data,
 formal-worker, optimizer-step, checkpoint/resume, and downstream-hook CPU
 proof. Only lightweight static imports may run directly on a login node. A
 direct-attached GPU may use the declared local mode.
+
+### Reservation routing and visibility
+
+On Isambard specify `--reservation=interactive` without `--partition`
+or a QoS override. Slurm selects its hidden partition and limits.
+Default queue/partition views omit hidden resources; always use `--all`.
+`PrivateData` may hide peer jobs/accounts, so no visible peer usage is not
+proof that peers cannot use the pool. Do not treat `Accounts=root` alone
+as denial: on 2026-10-14, account `brics.u6ym` completed GPU probe 7413875
+in partition `interactive` despite that display. A bounded probe using
+the current account and correct routing decides access.
 
 ### Prevent false unavailable results
 
@@ -120,117 +142,29 @@ Before joining, `scontrol show job -dd JOB_ID` must show the current user,
 allocation shape to confirm the requested resources are free. Do not combine
 `--jobid` with `--reservation` or `--immediate`.
 
-Official BriCS docs: the `interactive` **reservation** is a dedicated node
-pool billed at **1.5 NHR per node-hour**, max 4 nodes and 8 hours, official
-per-user cap 1 running + 1 queued, not for large-volume batch. Faster start
-is that pool, not a higher multifactor priority. `interactive_qos` is a
-separate one-allocation QoS on the same pool; `workq`+`normal` plus
-`--reservation=interactive` still pays 1.5×. Recheck live limits. Canonical
-term table: `docs/research/modules/TRAINING_EFFICIENCY.md`.
+Official BriCS policy: the `interactive` reservation is for short-lived
+preflight, debugging and exploratory work, billed at 1.5x NHR, with up to
+4 nodes and 8 hours. Inspect live partition QoS and per-user allocation caps.
+The maximum walltime does not authorize long-running or high-throughput
+training. Such work uses ordinary `workq` without the reservation.
+Project authorization cannot override the site policy.
 
 - https://docs.isambard.ac.uk/user-documentation/guides/slurm-advanced/
 - https://docs.isambard.ac.uk/user-documentation/information/job-scheduling/
 - https://docs.isambard.ac.uk/user-documentation/guides/accounting/
 
-## Aggressive Formal Reservation Run
+## Short Preflight Allocation Reuse
 
-Reservation transport and scientific formality are separate. A completed
-command may retain formal status when it uses the exact reviewed contract,
-ledger identity, inputs, checkpoint semantics, outputs, and downstream gates.
-The project owner has confirmed formal-workload authorization and the 1.5×
-reservation rate. Treat `--reservation=interactive` as the first-choice
-execution transport when it shortens time to the requested result and fits
-the 8-hour / 4-node / official per-user job cap.
+Reuse only the current user's verified running reservation allocation with
+uncommitted resources inside its fixed `AllocTRES`. Use exact exclusive
+steps with separate mutable paths and visible exit status. A one-GPU
+allocation cannot claim other idle GPUs on the node. Release resources when
+the short-lived work ends; do not hold the pool for recurring training waves.
 
-Eligibility checklist:
-
-1. Run the normal CPU and GPU preflight first.
-2. Read the live enforced job, GPU/node, concurrency, and walltime limits before
-   allocation; size the route to what Slurm will accept.
-3. Use `srun --reservation=interactive --immediate=N` for a single command or
-   acquire one allocation and fill it with concurrent `srun --exclusive` steps.
-   Run further waves in the same allocation instead of leaving GPUs idle.
-4. Preserve the exact formal command identity. Record reservation, QoS, job ID,
-   allocation shape, 1.5× billing note, logs, artifacts, and receipt.
-5. Compare expected time to useful evidence with ordinary `workq` without a
-   reservation. Prefer the reservation when immediate execution wins after the
-   premium.
-6. Inspect live `interactive_qos` and reservation job caps. `MaxJobsPU=1` or
-   an official 1-running-job reservation table limits **allocations**. It does
-   not serialize job steps, experiments, or worktrees inside one allocation.
-   Two session-owned `srun` jobs both showing `Reservation=interactive` are not
-   a policy change.
-
-This path may cover complete training runs, experiment matrices, evaluations,
-profiles, and cache builds that fit the reservation. There is no extra
-project-side job-count cap beyond scientific usefulness, the 1.5× rate, and
-Slurm/BriCS live limits. Preserve disjoint mutable state, capture every step
-exit status, release the allocation at completion, and use ordinary `workq`
-when the reservation cannot accept the shape or walltime.
-
-### Cross-worktree ownership
-
-Treat the reservation job as a shared allocation while it is running. Its
-owner launches formal workloads as `srun --exact --exclusive` steps instead of
-consuming the whole allocation with one unscoped command. Another worktree
-first discovers the active job and its uncommitted `AllocTRES`, then joins it with
-`--jobid`. Every step uses an absolute `--chdir`, separate mutable paths,
-explicit logs, and a visible exit status.
-
-Allocation capacity is fixed at submission. A one-GPU allocation cannot launch
-a four-GPU step even when three GPUs are idle on its node; those GPUs belong to
-neither that job nor its dispatcher. Conversely, GPUs already allocated to the
-owner are charged while idle, so request the planned packed shape and release it
-when its useful waves finish.
-
-Do not add a global filesystem lock that says the reservation is occupied. A step
-may be blocked only when the active allocation lacks its requested resources or
-remaining walltime. If the step fits the fixed allocation but resources are
-busy, use a later wave. If it exceeds the fixed allocation, use `workq` or wait
-to open a correctly sized allocation.
-
-For worktrees added after submission, start the allocation with
-`scripts/slurm_interactive_allocation_owner.sh`. Enqueue the reviewed command
-through `scripts/interactive_allocation_dispatcher.py enqueue`; the allocation
-owner launches and waits for the exact exclusive step, so Codex or SSH may
-disconnect. The dispatcher rejects jobs not started with this owner and requests
-larger than the owner's fixed GPU allocation; it cannot retrofit another
-running batch job. Use `stop --job-id JOB_ID` after the final request. The owner
-exits automatically after its bounded idle timeout.
-
-## Background Reservation Long Run
-
-Use Slurm-owned background execution for a long formal run so closing Codex or
-SSH cannot kill its controller. Submit one reviewed allocation-owner script
-with `sbatch`, not a shell-backgrounded or session-owned `srun`. The owner
-launches initial workloads as exact exclusive steps so unused resources remain
-joinable:
-
-```bash
-job_id=$(sbatch --parsable \
-  --reservation=interactive \
-  --gpus=4 \
-  --cpus-per-task=48 \
-  --mem-per-gpu=48G \
-  --time=08:00:00 \
-  --output=/ABSOLUTE/LOG_ROOT/formal_%j.out \
-  --error=/ABSOLUTE/LOG_ROOT/formal_%j.err \
-  FORMAL_SCRIPT)
-```
-
-Do not pass `--wait`; return the job ID, log paths, and follow command
-immediately. A packed script may launch concurrent `srun --exclusive` steps and
-must wait for all of them and propagate any failure.
-
-Check `sbatch --help` before assuming it supports `--immediate`. The Isambard
-client observed on 2026-08-11 did not. When strict immediate evidence matters,
-first run an exact-shape and exact-walltime `srun --immediate=N ... /bin/true`,
-then submit the background job. The allocation can change between those two
-commands, so the canary is evidence rather than a hold on those nodes. Keep any
-older ordinary `workq` copy until the reservation batch job reaches `RUNNING`;
-then cancel the duplicate only when authorized. Confirm durable ownership with
-`BatchFlag=1` in
-`scontrol show job -dd JOB_ID`.
+For durable long-running batch work, use Slurm-owned background `sbatch`
+in ordinary `workq` without `--reservation=interactive`, return job/log
+identifiers immediately, and inspect later. Do not replace reservation-only
+routing with `workq` plus the reservation even if a probe happens to start.
 
 ## Checkpointable Backfill
 
@@ -251,12 +185,15 @@ Official option semantics:
 
 ## Same-Effective-Batch MPS
 
-Prefer this before a larger `batch_size` or another GPU. Independent PyTorch
-processes keep their frozen batch, seed, and paths and share one GPU through
-NVIDIA CUDA MPS. Host RSS, not HBM, is usually the limiter.
+Consider this for independent underfilled compute workloads. Compare aggregate
+useful throughput, per-task slowdown, billed cost, host/shared memory and HBM.
+Neither unused HBM nor busy % proves a speedup. Preserve frozen batch, seed,
+paths and exact resume. Do not use MPS for frozen no-MPS or real-time control
+work. A larger batch remains a separate authorized scientific change.
 
 ```bash
 mps_pipe=/tmp/m2d-mps-${SLURM_JOB_ID}-${SLURM_RESTART_COUNT:-0}
+mps_log=/tmp/m2d-mps-log-${SLURM_JOB_ID}-${SLURM_RESTART_COUNT:-0}
 export CUDA_MPS_PIPE_DIRECTORY=${mps_pipe}
 export CUDA_MPS_LOG_DIRECTORY=${mps_log}
 mkdir -p "${mps_pipe}" "${mps_log}"
@@ -289,6 +226,11 @@ reduces scheduler objects and may keep work inside per-user examination caps;
 it does not increase priority.
 
 ## Resource Shape
+
+- Choose on the remaining critical-path horizon, including evaluation/render
+  stages. Reconsider only at useful task/stage/checkpoint boundaries or material
+  resource facts. Include startup, checkpoint, restart, retries and requeue
+  costs. Apply changes to future submissions, not running frozen jobs.
 
 - On Isambard, verify the effective request with `scontrol show job -dd`; a
   job-level `--mem` may not express the desired per-GPU host-memory shape under

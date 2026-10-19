@@ -85,8 +85,11 @@ refactoring, and same-claim revisions stay as routes or runs in the parent.
    focused validation.
 5. Select the installed compute module and run its preflight before formal
    training. Local preflight checks a small real end-to-end path. Cluster
-   preflight also compares a normal resource setup with viable faster setups
-   before selecting the exact launch.
+   preflight also compares a normal resource setup with viable alternatives.
+   The Slurm module defaults to the lowest billed cost within 10% of the fastest
+   comparable feasible time to all remaining results, subject to authorized
+   budget/resource/deadline limits. Validate future allocations at useful
+   task/stage/checkpoint boundaries; do not retune running frozen jobs.
 6. Record the command, environment, runtime identity, logs, and expected
    artifacts in the experiment. The compute module owns submission and live
    status checks.

@@ -1,18 +1,20 @@
 ---
 name: slurm-training-optimizer
-description: Inspect live Slurm state, choose the fastest legitimate training or GPU-evaluation launch, and close the efficiency decision from normal runtime evidence. Use when queue placement, reuse of a `--reservation=interactive` allocation, resource shape, GPU occupancy, MPS, node packing, backfill, or queue breadth is still a live decision, or when a training check must decide whether to keep or change that launch.
+description: Inspect Slurm resources and select the lowest-cost feasible training or GPU-evaluation shape within 10% of the fastest comparable time to result. Use when placement, allocation reuse, resource shape, concurrency, backfill, or queue breadth can change the next launch, or a training check must close that efficiency decision.
 ---
 
 # Slurm Training Optimizer
 
-Minimize time to useful GPU work without changing scientific semantics,
-exact-resume behavior, artifact isolation, or scheduler policy.
+Balance time to all declared results and billed compute: default to the
+lowest-cost feasible shape within 10% of the fastest comparable shape. Preserve
+scientific semantics, exact resume, artifact isolation, and scheduler policy.
 
 ## Load
 
 1. Read repository `AGENTS.md`, `docs/research/WORKFLOW.md`,
-   `docs/research/modules/TRAINING_EFFICIENCY.md`, and
-   `docs/research/modules/TRAINING_PREFLIGHT.md`.
+   the installed `TRAINING_EFFICIENCY.md` and `TRAINING_PREFLIGHT.md`
+   (under `docs/research/` or the project's `docs/research/modules/`),
+   and the Isambard site overlay when applicable.
 2. Resolve the explicit experiment and run:
 
    ```bash
@@ -36,35 +38,53 @@ python scripts/slurm_state_snapshot.py \
 
 Use its jobs, active steps, `dispatcher_ready`/`reusable_gpus`, QoS,
 reservations, partitions, pending reasons, scheduler parameters, and recent
-accounting. Inspect a specific job further only when a missing field could
+accounting. Include hidden partitions with `--all` and retain `PrivateData`;
+do not infer peer usage or access from incomplete visibility. Reservation fields
+such as `Accounts=root` alone do not prove account denial: use a correctly
+routed bounded probe. Inspect a specific job further only when a missing field could
 change the launch. Never infer another user's entitlement.
 
-For a new or unsettled training launch, compare the ordinary request with one
-or two viable faster resource shapes. Use matched prior runs when available;
-otherwise make only short probes that can change the choice. Record queue wait,
-effective update throughput, memory/headroom, and estimated time to all
-declared stages for each shape. Keep the scientific contract fixed and select
-the fastest viable time to result, with the ordinary request as fallback.
+The capture expands array elements and separates `recent_jobs` allocations
+from `recent_steps` execution statistics. Use actual allocated/billed resources,
+not just the request. Missing usage is unknown, not zero; failed/unknown step
+usage cannot establish free dispatcher GPUs. Respect the capture interval.
 
-Build those candidates in this order:
+Compare the ordinary request with one or two useful alternatives under the same
+contract and remaining-result horizon. Respect authorized resource/concurrency
+caps, remaining budget, deadlines, memory and real-time constraints first.
+Use matched prior evidence, with short probes only when decision-relevant.
+Compare end-to-end queue/startup/critical-path/retry time and all remaining
+billed node-hours, including switch costs. Remove dominated shapes, then choose
+the lowest cost within `T_best * 1.10`; use faster time to break cost ties.
+Only an explicit user/contract choice overrides the 0.10 tolerance. The ordinary
+request remains a fallback when it satisfies the same hard limits.
+
+Follow the installed `TRAINING_EFFICIENCY.md` input format. The read-only
+`scripts/slurm_resource_policy.py` computes this choice; pass candidate estimates
+to the existing launch packet with `--resource-candidates FILE`. Missing time,
+cost or evidence is unranked, never free; selection is among quantified
+comparable candidates, not a proven global optimum.
+
+Generate only useful candidates; this list is not a fixed ranking:
 
 1. Reuse free resources inside a verified dispatcher allocation. A plain batch
    job and node-idle GPUs outside fixed `AllocTRES` are not reusable.
-2. Use the authorized `--reservation=interactive` fast path when it wins
-   wall-clock time, fits the live 8-hour / 4-node / per-user job cap, and the
-   1.5× NHR premium is accepted. This is the reserved node pool, not a higher
-   Slurm priority score and not automatically `interactive_qos`. Use
-   Slurm-owned background `sbatch` for long work.
+2. On Isambard use `--reservation=interactive` for short preflight, debugging
+   or exploratory work within live limits and the accepted 1.5x NHR premium.
+   Do not specify `--partition` or override `--qos`; the reservation selects
+   the hidden partition and its QoS limits. Long-running or high-throughput
+   training uses ordinary `workq`, not this pool.
 3. Right-size GPUs, CPUs, `--mem-per-gpu`, and walltime from estimates and
    recent elapsed/`MaxRSS`; keep demonstrated OOM/timeout headroom.
-4. Prefer same-effective-batch CUDA MPS for independent processes, then pack
-   remaining tasks as exclusive steps in one matching multi-GPU allocation.
+4. Consider same-effective-batch MPS for independent underfilled compute tasks
+   after a matched canary, not for a frozen no-MPS or real-time controller.
+   Compare true per-GPU jobs with matching multi-GPU packing by time and cost.
    Packed or array steps need unique node-local `TMPDIR` and unique atomic-write
    names; do not rewrite a shared cohort or manifest from every worker.
 5. Use `--time-min` only with proved useful atomic exact resume.
 6. Use bounded waves when useful jobs exceed the live backfill test cap.
 7. Fall back to ordinary `workq` without the reservation when the reserved
-   pool cannot start or cannot keep the 8-hour contract.
+   pool cannot start or the workload is outside its short-lived scope.
 
 Keep `batch_size`, LR, seed, update budget, and route fixed. A matched
 `batch_size` change requires explicit user approval and cannot alter a running
@@ -77,8 +97,14 @@ Pass the same snapshot to the read-only launch packet:
 ```bash
 python scripts/experiment_ledger.py launch-packet \
   --scope SCOPE --slurm-snapshot /tmp/research-loop-slurm.json \
+  --resource-candidates /tmp/resource-candidates.json \
   EXP-ID -- EXACT-LAUNCH-COMMAND
 ```
+
+Candidates must bind the same snapshot timestamp. The recommendation does not
+rewrite/execute the launch command or confer resource-budget approval. Compile
+the selected exact command and validate it through the existing normal gate.
+Settled launches need no fresh candidate file on every check.
 
 When implementation is authorized, change only the operational launcher or
 preflight surface, run the selected exact-command correctness preflight, and
@@ -91,8 +117,16 @@ During the normal explicit training check, use the first representative stable
 window or terminal job evidence. Do not launch a dedicated profiling job.
 Capture only decision-relevant facts already available from logs/accounting:
 actual placement and `TimeLimit`, elapsed, `MaxRSS`/AveCPU, GPU utilization and
-peak HBM when emitted, aggregate `update/s`, packed-step exits, and exact-resume
+peak HBM when emitted, comparable useful work/s and work/billed node-hour,
+packed-step exits, and exact-resume
 behavior when used.
+
+Reconsider future allocations at task completion, stage transition, a safe
+checkpoint/relaunch boundary, or materially changed throughput/availability,
+budget or deadline. Allocate incremental resources to the approved critical
+path where finish-time gain per extra node-hour is greatest. Include restart
+and requeue costs; keep the current shape when they erase the benefit. Never
+cancel, resize, migrate or edit a running frozen job to enact this policy.
 
 Return exactly one efficiency decision:
 
@@ -108,18 +142,19 @@ modifies the launch. Runtime evidence stays with normal logs/artifacts and the
 experiment execution snapshot. Do not create a tracker, scorecard, or repeated
 self-audit.
 
-Report the normal and selected shapes, snapshot time, evidence and estimated
-time to result for each, launch/preflight state, and the final
+Report the normal and selected shapes, snapshot interval, evidence, estimated
+time to result and billed cost for each, the 10% band/explicit override,
+launch/preflight state, and the final
 `keep`/`change`/`unknown` closure.
 Separate scheduler facts, inferred benefit, runtime proof, and scientific
 acceptance.
 
 ## Boundaries
 
-- Use `--reservation=interactive` only within the project's formal-workload
-  authorization and the live reservation / `interactive_qos` / account limits.
-  Treat 1.5× NHR as the reservation price, including `workq`+`normal` jobs that
-  only add the reservation flag. Do not open a second reservation allocation
+- Use `--reservation=interactive` only for site-permitted short-lived work
+  within the live reservation / partition QoS / account limits. Never combine
+  it with an explicit partition or QoS override on Isambard. Project approval
+  does not override site policy. Do not open a second reservation allocation
   when one verified allocation can take the step.
 - Never weaken exact resume, provenance identity, failure visibility, or
   disjoint mutable paths to reduce wait time.

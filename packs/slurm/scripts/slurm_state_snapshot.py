@@ -73,10 +73,13 @@ def integer(value: str | None) -> int | None:
 
 
 def gpu_count(tres: str | None) -> int | None:
-    if not tres:
+    if not tres or tres == "(null)":
         return None
-    matches = re.findall(r"(?:^|,)(?:gres/)?gpu(?:[:/][^=,]+)?=(\d+)", tres)
-    return sum(int(value) for value in matches) if matches else None
+    total = re.search(r"(?:^|,)(?:gres/)?gpu=(\d+)(?:,|$)", tres)
+    if total:
+        return int(total.group(1))
+    typed = re.findall(r"(?:^|,)(?:gres/)?gpu[:/][^=,]+=(\d+)", tres)
+    return sum(int(value) for value in typed) if typed else 0
 
 
 def source_result(
@@ -97,16 +100,19 @@ def source_result(
     }
     if result.returncode != 0:
         source["error"] = result.stderr.strip() or result.stdout.strip()
-    return result, source
+    return (result if result.returncode == 0 else None), source
 
 
 def collect_snapshot(
     *, user: str, since: str = "now-2days", runner: Runner = run_command
 ) -> dict[str, object]:
+    capture_started_at = utc_now()
     sources: dict[str, object] = {}
 
     queue_command = [
         "squeue",
+        "--all",
+        "--array",
         "-h",
         "-u",
         user,
@@ -180,13 +186,18 @@ def collect_snapshot(
                 "cpus": integer(record.get("CPUs")),
                 "tasks": integer(record.get("Tasks")),
                 "tres": record.get("TRES", ""),
-                "gpus": gpu_count(record.get("TRES")) or 0,
+                "gpus": (
+                    0
+                    if record.get("StepId", "").endswith((".batch", ".extern"))
+                    and record.get("TRES", "") in {"", "(null)"}
+                    else gpu_count(record.get("TRES"))
+                ),
             }
             for record in records
         ]
 
     sinfo_result, sources["partitions"] = source_result(
-        runner, ["sinfo", "-h", "-o", "%P|%a|%l|%D|%t|%G"]
+        runner, ["sinfo", "--all", "-h", "-o", "%P|%a|%l|%D|%t|%G"]
     )
     partitions = (
         parse_pipe_records(
@@ -212,13 +223,14 @@ def collect_snapshot(
         "max_tres_per_job",
         "max_wall",
         "flags",
+        "usage_factor",
     )
     qos_command = [
         "sacctmgr",
         "-nP",
         "show",
         "qos",
-        "format=Name,MaxJobsPU,MaxSubmitJobsPU,MaxTRESPU,MaxTRESPerJob,MaxWall,Flags",
+        "format=Name,MaxJobsPU,MaxSubmitJobsPU,MaxTRESPU,MaxTRESPerJob,MaxWall,Flags,UsageFactor",
     ]
     qos_result, sources["qos"] = source_result(runner, qos_command)
     qos = parse_pipe_records(qos_result.stdout, qos_fields) if qos_result else []
@@ -231,7 +243,12 @@ def collect_snapshot(
         key: value
         for key, value in config.items()
         if key
-        in {"SchedulerParameters", "SchedulerType", "PreemptMode", "PriorityType"}
+        in {
+            "SchedulerParameters", "SchedulerType", "PreemptMode", "PriorityType",
+            "PrivateData", "SelectTypeParameters", "AccountingStorageTRES",
+            "JobAcctGatherType", "JobAcctGatherFrequency",
+        }
+        or key.startswith("PriorityWeight")
     }
 
     recent_fields = (
@@ -245,22 +262,39 @@ def collect_snapshot(
         "alloc_tres",
         "max_rss",
         "exit_code",
+        "allocated_cpus",
+        "total_cpu",
+        "tres_usage_in_ave",
+        "tres_usage_in_max",
+        "submit_time",
+        "eligible_time",
+        "start_time",
+        "end_time",
     )
     recent_command = [
         "sacct",
-        "-X",
         "-S",
         since,
         "-u",
         user,
         "-nP",
         "-o",
-        "JobIDRaw,JobName,Partition,QOS,State,Elapsed,Timelimit,AllocTRES,MaxRSS,ExitCode",
+        "JobIDRaw,JobName,Partition,QOS,State,Elapsed,Timelimit,AllocTRES,MaxRSS,ExitCode,AllocCPUS,TotalCPU,TRESUsageInAve,TRESUsageInMax,Submit,Eligible,Start,End",
     ]
     recent_result, sources["recent_jobs"] = source_result(runner, recent_command)
-    recent_jobs = (
+    recent_records = (
         parse_pipe_records(recent_result.stdout, recent_fields) if recent_result else []
     )
+    recent_jobs = []
+    recent_steps = []
+    for record in recent_records:
+        for field in ("max_rss", "total_cpu", "tres_usage_in_ave", "tres_usage_in_max"):
+            record[field] = record[field] or None
+        if "." in record["job_id"]:
+            record["allocation_id"] = record["job_id"].split(".", 1)[0]
+            recent_steps.append(record)
+        else:
+            recent_jobs.append(record)
 
     pending_reasons = Counter(
         job["reason"] for job in jobs if job["state"] == "PENDING" and job["reason"]
@@ -283,7 +317,10 @@ def collect_snapshot(
             except (OSError, json.JSONDecodeError):
                 dispatcher_ready = False
         steps = steps_by_job.get(job["job_id"], [])
-        committed_gpus = sum(int(step["gpus"]) for step in steps)
+        steps_known = sources[f"steps:{job['job_id']}"]["status"] == "ok" and all(
+            step["gpus"] is not None for step in steps
+        )
+        committed_gpus = sum(int(step["gpus"]) for step in steps) if steps_known else None
         allocated_gpus = job["allocated_gpus"]
         allocations.append(
             {
@@ -302,13 +339,14 @@ def collect_snapshot(
                 "dispatcher_ready": dispatcher_ready,
                 "reusable_gpus": (
                     max(0, int(allocated_gpus) - committed_gpus)
-                    if dispatcher_ready and allocated_gpus is not None
+                    if dispatcher_ready and allocated_gpus is not None and committed_gpus is not None
                     else None
                 ),
             }
         )
     return {
         "schema_version": 1,
+        "capture_started_at": capture_started_at,
         "captured_at": utc_now(),
         "user": user,
         "sources": sources,
@@ -317,6 +355,7 @@ def collect_snapshot(
         "reservations": reservations,
         "qos": qos,
         "recent_jobs": recent_jobs,
+        "recent_steps": recent_steps,
         "strategy_input": {
             "pending_reason_counts": dict(sorted(pending_reasons.items())),
             "running_allocations": allocations,

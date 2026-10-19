@@ -145,6 +145,7 @@ for agent in "${AGENTS[@]+"${AGENTS[@]}"}"; do
         install_skills "$ROOT/packs/core/skills" "$HOME/.cursor/skills"
         if [[ "$INSTALL_SLURM" -eq 1 ]]; then
           install_skills "$ROOT/packs/slurm/skills" "$HOME/.cursor/skills"
+          overlay_dir "$ROOT/packs/slurm/overlays" "$HOME/.cursor/skills"
         fi
         if [[ "$INSTALL_TOPIC" == "musics2dance" ]]; then
           install_skills "$ROOT/packs/musics2dance/skills" "$HOME/.cursor/skills"
@@ -155,6 +156,7 @@ for agent in "${AGENTS[@]+"${AGENTS[@]}"}"; do
         install_skills "$ROOT/packs/core/skills" "$DEST/.cursor/skills"
         if [[ "$INSTALL_SLURM" -eq 1 ]]; then
           install_skills "$ROOT/packs/slurm/skills" "$DEST/.cursor/skills"
+          overlay_dir "$ROOT/packs/slurm/overlays" "$DEST/.cursor/skills"
         fi
         if [[ "$INSTALL_TOPIC" == "musics2dance" ]]; then
           install_skills "$ROOT/packs/musics2dance/skills" "$DEST/.cursor/skills"
@@ -174,6 +176,7 @@ for agent in "${AGENTS[@]+"${AGENTS[@]}"}"; do
         install_skills "$ROOT/packs/core/skills" "$HOME/.codex/skills"
         if [[ "$INSTALL_SLURM" -eq 1 ]]; then
           install_skills "$ROOT/packs/slurm/skills" "$HOME/.codex/skills"
+          overlay_dir "$ROOT/packs/slurm/overlays" "$HOME/.codex/skills"
         fi
         if [[ "$INSTALL_TOPIC" == "musics2dance" ]]; then
           install_skills "$ROOT/packs/musics2dance/skills" "$HOME/.codex/skills"
@@ -185,6 +188,7 @@ for agent in "${AGENTS[@]+"${AGENTS[@]}"}"; do
         install_skills "$ROOT/packs/core/skills" "$DEST/.agents/skills"
         if [[ "$INSTALL_SLURM" -eq 1 ]]; then
           install_skills "$ROOT/packs/slurm/skills" "$DEST/.agents/skills"
+          overlay_dir "$ROOT/packs/slurm/overlays" "$DEST/.agents/skills"
         fi
         if [[ "$INSTALL_TOPIC" == "musics2dance" ]]; then
           install_skills "$ROOT/packs/musics2dance/skills" "$DEST/.agents/skills"

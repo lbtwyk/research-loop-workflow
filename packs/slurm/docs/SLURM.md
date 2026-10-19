@@ -8,8 +8,10 @@ job recovery, and stage execution.
    storage. Do not apply another site's settings.
 2. Use `slurm_state_snapshot.py` for current queue facts and the ledger's
    `launch-packet` to inspect declared stages before submission. List a normal
-   request and viable faster resource shapes, then select by time to the
-   declared result. [TRAINING_EFFICIENCY.md](TRAINING_EFFICIENCY.md) owns this
+   request and viable alternatives, then select the lowest billed cost within
+   10% of the fastest feasible time to all remaining declared results. Respect
+   authorized resource/budget/deadline limits and change future submissions
+   only. [TRAINING_EFFICIENCY.md](TRAINING_EFFICIENCY.md) owns this
    comparison.
 3. Run or reuse the exact-command correctness preflight for the selected
    shape as described in [PREFLIGHT.md](PREFLIGHT.md). Submit formal training

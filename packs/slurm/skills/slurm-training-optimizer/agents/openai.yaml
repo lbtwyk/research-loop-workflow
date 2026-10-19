@@ -1,0 +1,4 @@
+interface:
+  display_name: "Slurm Training Optimizer"
+  short_description: "Balance Slurm speed and billed compute cost"
+  default_prompt: "Use $slurm-training-optimizer to select the lowest billed cost within 10% of the fastest feasible time to result, then close the next-launch decision as keep, change, or unknown without modifying running jobs."

@@ -2193,6 +2193,39 @@ def load_slurm_snapshot(root: Path, value: str | None) -> dict[str, object] | No
     return snapshot
 
 
+def compile_resource_selection(
+    root: Path, args: argparse.Namespace, snapshot: dict[str, object] | None
+) -> dict[str, object] | None:
+    value = getattr(args, "resource_candidates", None)
+    if value is None:
+        return None
+    if snapshot is None:
+        raise LedgerError("--resource-candidates requires --slurm-snapshot")
+    try:
+        from scripts import slurm_resource_policy
+    except ModuleNotFoundError:
+        try:
+            import slurm_resource_policy
+        except ModuleNotFoundError as error:
+            raise LedgerError("resource selection requires the slurm pack") from error
+    path = Path(value)
+    if not path.is_absolute():
+        path = root / path
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict) or not snapshot.get("captured_at") or payload.get(
+            "snapshot_captured_at"
+        ) != snapshot["captured_at"]:
+            raise ValueError("resource candidates must bind this snapshot_captured_at")
+        result = slurm_resource_policy.select_resources(
+            payload, slowdown_tolerance=getattr(args, "slowdown_tolerance", None)
+        )
+    except (OSError, ValueError) as error:
+        raise LedgerError(f"cannot select resources: {error}") from error
+    result["snapshot_captured_at"] = snapshot["captured_at"]
+    return result
+
+
 def launch_manifests(root: Path, experiment_id: str) -> list[dict[str, object]]:
     manifests: list[dict[str, object]] = []
     for path in sorted((root / "slurm" / experiment_id).glob("launch-manifest-*.json")):
@@ -2345,6 +2378,7 @@ def command_launch_packet(root: Path, args: argparse.Namespace) -> None:
         root, item, contract, scope
     )
     snapshot = load_slurm_snapshot(root, args.slurm_snapshot)
+    resource_selection = compile_resource_selection(root, args, snapshot)
     closure = compile_stage_closure(
         root,
         experiment_id=args.experiment_id,
@@ -2392,6 +2426,7 @@ def command_launch_packet(root: Path, args: argparse.Namespace) -> None:
         "lifecycle": item.get("lifecycle"),
         "launch_scope": scope,
         "stage_closure": closure,
+        "resource_selection": resource_selection,
         "launch": {
             "command": command,
             "launcher": launcher,
@@ -3059,6 +3094,8 @@ def build_parser() -> argparse.ArgumentParser:
     packet_parser.add_argument("experiment_id")
     packet_parser.add_argument("--scope")
     packet_parser.add_argument("--slurm-snapshot")
+    packet_parser.add_argument("--resource-candidates", help="same-snapshot resource estimates; read-only recommendation")
+    packet_parser.add_argument("--slowdown-tolerance", type=float, help="fraction slower than fastest; default 0.10 or candidate policy")
     packet_parser.add_argument("--output")
     packet_parser.add_argument("launch_command", nargs=argparse.REMAINDER)
     packet_parser.set_defaults(handler=command_launch_packet)

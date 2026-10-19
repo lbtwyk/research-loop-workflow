@@ -16,3 +16,8 @@ This is the scheduler implementation of the
 
 Ledger commands `preflight`, `launch`, and `launch-packet --slurm-snapshot`
 load `scripts/slurm_state_snapshot.py` and `scripts/training_preflight.py`.
+For an unsettled shape, `launch-packet --resource-candidates FILE` also loads
+`slurm_resource_policy.py`: lowest billed cost within 10% of the fastest
+comparable feasible time to result. This read-only calculation is not a GPU
+preflight, budget authorization, or permission to change running jobs. Observe
+allocation and execution-step usage separately; unknown usage is not zero.

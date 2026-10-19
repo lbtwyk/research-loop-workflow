@@ -64,6 +64,14 @@ project launcher. Kubernetes validates and probes a Job on the target cluster.
 Both record their evidence in the same experiment ledger. Multiple compute
 packs can coexist.
 
+Slurm resource selection defaults to the lowest billed node-hour cost within
+10% of the fastest comparable feasible time to all remaining results. The
+snapshot expands job arrays and retains execution-step usage separately from
+allocations; missing usage is unknown. `launch-packet --resource-candidates FILE`
+adds a read-only recommendation, not automatic scheduling or job mutation.
+See [Training Efficiency](packs/slurm/docs/TRAINING_EFFICIENCY.md) for candidate
+input, hard limits, safe adjustment boundaries, and the normal launch gate.
+
 ## What This Is Not
 
 - Not a copy of Musics2Dance science or experiment records

@@ -62,7 +62,9 @@ route's design, reason, decisive evidence, decision, successor, and artifacts.
 - Before direct-attached GPU training, run a short real-data preflight through
   one update, checkpoint reload, and declared downstream entrypoints on tiny
   inputs. Use early formal-run evidence to confirm continued progress. For a
-  cluster launch, compare normal and viable faster resource shapes, then prove
+  cluster launch, compare normal and viable alternative shapes using the Slurm
+  near-fastest policy (lowest billed cost within 10% of fastest feasible time
+  to remaining results, respecting authorized limits), then prove
   the selected exact command on the target scheduler.
 - Update through ledger add/update/close/lint; never hand-edit generated views.
 - Result-to-claim and experiment audit provide decision evidence. Only the user
