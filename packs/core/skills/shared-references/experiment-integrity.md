@@ -46,4 +46,5 @@
 
 The **reviewer model** (different family from executor) performs integrity checks via `/experiment-audit`. The executor collects file paths; the reviewer reads code and results directly.
 
-**Never let the executor judge its own experiment integrity.**
+The executor still runs its own checks while working; those catch errors early
+but never count as the independent pass.

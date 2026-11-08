@@ -23,44 +23,29 @@ The reviewer must judge primary artifacts directly. The executor can define the 
 ## Correct Pattern
 
 ```text
-spawn_agent:
-  model: gpt-5.6-sol
-  reasoning_effort: xhigh
-  message: |
-    Review the project as a senior ML reviewer.
+Review the project as a senior ML reviewer.
 
-    Files to read directly:
-    - /path/to/PROPOSAL.md
-    - /path/to/EXPERIMENT_LOG.md
-    - /path/to/paper/main.tex
-    - /path/to/src/
+Files to read directly:
+- /path/to/docs/experiments/EXP-ID.md
+- /path/to/docs/experiments/contracts/EXP-ID.json
+- /path/to/runtime/EXP-ID/eval/summary.json
+- /path/to/src/
 ```
 
 ## Incorrect Pattern
 
 ```text
-spawn_agent:
-  model: gpt-5.6-sol
-  reasoning_effort: xhigh
-  message: |
-    The main contribution is a new loss function that improves by 15%.
-    I think the weak point is the ablation.
-    Please confirm this is publishable.
+The main contribution is a new loss function that improves by 15%.
+I think the weak point is the ablation.
+Please confirm this is publishable.
 ```
 
 ## Multi-Round Follow-Up
 
-When a skill uses multi-round review, reuse the same reviewer id with `send_input`, but still avoid injecting executor conclusions. Pass revised artifacts or targeted follow-up requests, not spin.
+When a review needs a follow-up round, pass revised artifacts or a targeted
+question, not the executor's spin on what changed.
 
 ## Applies To
 
-This protocol applies to all cross-agent review calls in `skills/skills-codex/`, including:
-
-- `research-review`
-- `auto-review-loop`
-- `paper-plan`
-- `paper-write`
-- `paper-figure`
-- `rebuttal`
-- `meta-optimize`
-- any skill that launches a reviewer via `spawn_agent` or continues one via `send_input`
+Every reviewer call made by a shared research skill, whatever adapter spawns
+it (see `reviewer-routing.md`).

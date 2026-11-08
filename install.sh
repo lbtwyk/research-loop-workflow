@@ -22,6 +22,7 @@ Install research-loop-workflow packs into a project or personal skill dir.
   ./install.sh --dest /path/to/project --kubernetes --agent codex
   ./install.sh --dest /path/to/project --local --slurm --kubernetes --topic musics2dance --agent cursor --agent codex
   ./install.sh --personal --core --agent cursor
+  ./install.sh --dest /path/to/project --slurm --agent claude
 
 Every compute or topic module includes --core. With no module flag, only core installs.
 --dest is required unless --personal is used alone for skills.
@@ -199,6 +200,49 @@ for agent in "${AGENTS[@]+"${AGENTS[@]}"}"; do
           mkdir -p "$DEST/.codex/hooks"
           cp -a "$ROOT/packs/slurm/scripts/experiment_guard.py" "$DEST/.codex/hooks/experiment_guard.py"
           cp -a "$ROOT/adapters/codex/.codex/hooks.json" "$DEST/.codex/hooks.json"
+        fi
+      fi
+      ;;
+    claude)
+      if [[ "$PERSONAL" -eq 1 ]]; then
+        install_skills "$ROOT/packs/core/skills" "$HOME/.claude/skills"
+        if [[ "$INSTALL_SLURM" -eq 1 ]]; then
+          install_skills "$ROOT/packs/slurm/skills" "$HOME/.claude/skills"
+          overlay_dir "$ROOT/packs/slurm/overlays" "$HOME/.claude/skills"
+        fi
+        if [[ "$INSTALL_TOPIC" == "musics2dance" ]]; then
+          install_skills "$ROOT/packs/musics2dance/skills" "$HOME/.claude/skills"
+        fi
+        overlay_dir "$ROOT/adapters/claude/skills-overlays" "$HOME/.claude/skills"
+        overlay_dir "$ROOT/adapters/claude/agents" "$HOME/.claude/agents"
+      fi
+      if [[ -n "$DEST" ]]; then
+        install_skills "$ROOT/packs/core/skills" "$DEST/.claude/skills"
+        if [[ "$INSTALL_SLURM" -eq 1 ]]; then
+          install_skills "$ROOT/packs/slurm/skills" "$DEST/.claude/skills"
+          overlay_dir "$ROOT/packs/slurm/overlays" "$DEST/.claude/skills"
+        fi
+        if [[ "$INSTALL_TOPIC" == "musics2dance" ]]; then
+          install_skills "$ROOT/packs/musics2dance/skills" "$DEST/.claude/skills"
+        fi
+        overlay_dir "$ROOT/adapters/claude/skills-overlays" "$DEST/.claude/skills"
+        overlay_dir "$ROOT/adapters/claude/agents" "$DEST/.claude/agents"
+        mkdir -p "$DEST/.claude/rules"
+        cp -a "$ROOT/adapters/claude/rules/research-rigor.md" "$DEST/.claude/rules/research-rigor.md"
+        if [[ ! -f "$DEST/CLAUDE.md" ]]; then
+          cp -a "$ROOT/adapters/claude/project-CLAUDE.md" "$DEST/CLAUDE.md"
+        elif ! grep -qxF "@.claude/rules/research-rigor.md" "$DEST/CLAUDE.md"; then
+          printf '\n@.claude/rules/research-rigor.md\n' >> "$DEST/CLAUDE.md"
+          echo "added @.claude/rules/research-rigor.md to existing $DEST/CLAUDE.md" >&2
+        fi
+        if [[ "$INSTALL_SLURM" -eq 1 ]]; then
+          mkdir -p "$DEST/.claude/hooks"
+          cp -a "$ROOT/packs/slurm/scripts/experiment_guard.py" "$DEST/.claude/hooks/experiment_guard.py"
+          if [[ ! -f "$DEST/.claude/settings.json" ]]; then
+            cp -a "$ROOT/adapters/claude/.claude/settings.json" "$DEST/.claude/settings.json"
+          elif ! grep -q experiment_guard "$DEST/.claude/settings.json"; then
+            echo "kept existing $DEST/.claude/settings.json; add the PreToolUse hook from $ROOT/adapters/claude/.claude/settings.json" >&2
+          fi
         fi
       fi
       ;;

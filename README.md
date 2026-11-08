@@ -7,7 +7,7 @@ repository does not contain datasets, models, or experiment results.
 Two axes, installed separately:
 
 - Research: `core` → `local`, `slurm`, or `kubernetes` → optional project topic
-- Agent: `cursor` / `codex`
+- Agent: `cursor` / `codex` / `claude`
 
 ## Install
 
@@ -18,6 +18,9 @@ Two axes, installed separately:
 # Slurm cluster
 ./install.sh --dest /path/to/project --slurm --agent cursor
 
+# Slurm cluster with Claude Code (see adapters/claude/README.md)
+./install.sh --dest /path/to/project --slurm --agent claude
+
 # Kubernetes / KubeSphere cluster
 ./install.sh --dest /path/to/project --kubernetes --agent codex
 
@@ -27,7 +30,7 @@ Two axes, installed separately:
 ```
 
 `--agent` is optional. Without it, ledger and docs install, but no
-`.cursor/` or `.codex/` files are written.
+`.cursor/`, `.codex/`, or `.claude/` files are written.
 
 Personal skill install:
 
@@ -47,6 +50,7 @@ packs/kubernetes/      Kubernetes/KubeSphere jobs and result delivery
 packs/musics2dance/    project and host overlays
 adapters/cursor/       .cursor rules, hooks, research-reviewer overlay
 adapters/codex/        .codex hooks, agents/openai.yaml
+adapters/claude/       CLAUDE.md, .claude hooks, reviewer agent, review-routing overlays
 ```
 
 ## Commands After Core Install
@@ -78,6 +82,11 @@ Run scheduler-independent regression checks with:
 ```bash
 python -m unittest discover -s tests -v
 ```
+
+After a Slurm install, `python3 scripts/slurm_progress.py` shows live jobs,
+pending reasons, log-reported training progress, and exact log follow commands.
+Append job IDs for a focused view, or `--json` for source evidence and bounded
+log tails. See [Slurm Progress](packs/slurm/docs/SLURM_PROGRESS.md).
 
 Slurm resource selection defaults to the lowest billed node-hour cost within
 10% of the fastest comparable feasible time to all remaining results. The
