@@ -281,6 +281,11 @@ class InstalledPolicyTests(unittest.TestCase):
             self.assertIn("snapshot_captured_at", mismatch.stderr)
             help_result = subprocess.run([sys.executable, "scripts/experiment_ledger.py", "launch-packet", "--help"], cwd=root, text=True, capture_output=True, check=True)
             self.assertIn("--resource-candidates", help_result.stdout)
+            progress_help = subprocess.run(
+                [sys.executable, "scripts/slurm_progress.py", "--help"],
+                cwd=root, text=True, capture_output=True, check=True,
+            )
+            self.assertIn("--history", progress_help.stdout)
 
 
 if __name__ == "__main__":

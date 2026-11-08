@@ -23,6 +23,12 @@ job recovery, and stage execution.
    demonstrated same-contract failures; keep scheduler completion separate
    from experiment acceptance.
 
+For a read-only progress view, run `python3 scripts/slurm_progress.py` (all
+live user jobs) or append job IDs. It reports pending reasons, log-reported
+training steps, real log paths and follow commands, with accounting fallback
+for finished jobs. See [SLURM_PROGRESS.md](SLURM_PROGRESS.md) for JSON output,
+history, supported logs, and completion boundaries.
+
 [TRAINING_EFFICIENCY.md](TRAINING_EFFICIENCY.md) covers resource choices.
 The core `training-check-acceptance` skill owns the automatic operational loop;
 this module supplies its Slurm status, preflight, launch, and recovery details.
